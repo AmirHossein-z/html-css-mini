@@ -14,9 +14,6 @@ export default function Birthday() {
     haveParty();
   }, []);
 
-  // const myFont = localFont({ src: "./(fonts)/ScholarlyAmbition-Regular.ttf" });
-  // font kar nemikone
-
   const haveParty = async () => {
     for (let i = 0; i < 5; i++) {
       span1.current?.click();

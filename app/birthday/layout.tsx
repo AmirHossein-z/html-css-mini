@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 // import Script from "next/script";
 
-const myFont = localFont({
-  src: "../../public/fonts/ScholarlyAmbition-Regular.ttf",
+const scholarlyAmbition = localFont({
+  src: "../../public/fonts/ScholarlyAmbition-Regular.woff",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -18,7 +19,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={myFont.className}>{children}</body>
+      <body className={scholarlyAmbition.className}>{children}</body>
     </html>
   );
 }
