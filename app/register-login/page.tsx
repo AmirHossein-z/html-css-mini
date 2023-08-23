@@ -2,7 +2,6 @@
 import { MouseEvent, useState } from "react";
 import { FaUserAlt } from "react-icons/fa";
 import { FaLock } from "react-icons/fa";
-import { IoMdMail } from "react-icons/io";
 import { MdEmail } from "react-icons/md";
 import { FaFacebookF } from "react-icons/fa";
 import { FaGoogle } from "react-icons/fa";
@@ -24,6 +23,92 @@ interface IModalContainer {
   ) => void;
   targetModal: IModalType["type"];
 }
+
+const LoginWith = ({
+  changeModalState,
+}: {
+  changeModalState: (modalType: IModalType["type"], state?: boolean) => void;
+}) => {
+  return (
+    <>
+      <div
+        className="text-white bg-blue-400 rounded-full cursor-pointer hover:scale-110 p-3 transition-all duration-300 ease-in-out"
+        onClick={() => changeModalState("TWITTER", true)}
+      >
+        <BsTwitter className="text-xl" />
+      </div>
+      <div
+        className="text-white bg-blue-700 rounded-full cursor-pointer hover:scale-110 p-3 transition-all duration-300 ease-in-out"
+        onClick={() => changeModalState("FACEBOOK", true)}
+      >
+        <BsFacebook className="text-xl" />
+      </div>
+      <div
+        className="text-white bg-red-500 rounded-full cursor-pointer hover:scale-110 p-3 transition-all duration-300 ease-in-out"
+        onClick={() => changeModalState("GOOGLE", true)}
+      >
+        <BsGoogle className="text-xl" />
+      </div>
+    </>
+  );
+};
+
+const LoginForm = () => {
+  const [loginInputs, setLoginInputs] = useState({
+    loginUsername: "",
+    loginPassword: "",
+  });
+
+  const onChangeFormLogin = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLoginInputs({ ...loginInputs, [e.target.name]: e.target.value });
+  };
+
+  return (
+    <form className="flex flex-col gap-5">
+      <div className="flex flex-col gap-2">
+        <label
+          htmlFor="loginUsername"
+          className="text-base font-medium text-gray-800"
+        >
+          username
+        </label>
+        <div className="relative">
+          <FaUserAlt className="absolute top-2 left-2.5 text-indigo-600 " />
+          <Input
+            type="text"
+            id="loginUsername"
+            name="loginUsername"
+            value={loginInputs.loginUsername}
+            onChange={onChangeFormLogin}
+          />
+        </div>
+      </div>
+      <div className="flex flex-col gap-2">
+        <label
+          htmlFor="loginPassword"
+          className="text-base font-medium text-gray-800"
+        >
+          password
+        </label>
+        <div className="relative">
+          <FaLock className="absolute top-2 left-2.5 text-indigo-600" />
+          <Input
+            type="password"
+            id="loginPassword"
+            name="loginPassword"
+            value={loginInputs.loginPassword}
+            onChange={onChangeFormLogin}
+          />
+        </div>
+      </div>
+      <div className="">
+        <button className="mx-auto flex items-center justify-center rounded-3xl bg-indigo-700 hover:bg-indigo-900 transition-all ease-linear duration-300 text-white px-3.5 p-1.5 text-base font-medium shadow-lg w-1/2">
+          Log In
+        </button>
+      </div>
+    </form>
+  );
+};
 
 const ModalContainer = ({
   modal,
@@ -77,6 +162,7 @@ interface IInputProps {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
+
 const Input = ({ type, id, name, value = "", onChange }: IInputProps) => {
   return (
     <input
@@ -85,23 +171,8 @@ const Input = ({ type, id, name, value = "", onChange }: IInputProps) => {
       name={name}
       value={value}
       onChange={onChange}
-      className="w-full rounded-full border border-gray-300 shadow-glass bg-transparent p-1 focus:outline-none pl-8"
+      className="w-full rounded-xl border border-gray-300 shadow-glass bg-transparent p-1 focus:outline-none pl-8"
     />
-  );
-};
-
-const TwitterIcon = ({
-  changeModalState,
-}: {
-  changeModalState: (modalType: IModalType["type"], state?: boolean) => void;
-}) => {
-  return (
-    <div
-      className="text-white bg-blue-400 rounded-full cursor-pointer hover:scale-110 p-3 transition-all duration-300 ease-in-out"
-      onClick={() => changeModalState("TWITTER", true)}
-    >
-      <BsTwitter className="text-xl" />
-    </div>
   );
 };
 
@@ -131,59 +202,88 @@ const TabTitle = ({
   );
 };
 
-const GoogleIcon = ({
-  changeModalState,
-}: {
-  changeModalState: (modalType: IModalType["type"], state?: boolean) => void;
-}) => {
-  return (
-    <div
-      className="text-white bg-red-500 rounded-full cursor-pointer hover:scale-110 p-3 transition-all duration-300 ease-in-out"
-      onClick={() => changeModalState("GOOGLE", true)}
-    >
-      <BsGoogle className="text-xl" />
-    </div>
-  );
-};
-
-const FacebookIcon = ({
-  changeModalState,
-}: {
-  changeModalState: (modalType: IModalType["type"], state?: boolean) => void;
-}) => {
-  return (
-    <div
-      className="text-white bg-blue-700 rounded-full cursor-pointer hover:scale-110 p-3 transition-all duration-300 ease-in-out"
-      onClick={() => changeModalState("FACEBOOK", true)}
-    >
-      <BsFacebook className="text-xl" />
-    </div>
-  );
-};
-
-export default function RegisterLogin() {
-  const [activeTab, setActiveTab] = useState(0);
-  const [loginInputs, setLoginInputs] = useState({
-    loginUsername: "",
-    loginPassword: "",
-  });
-  const [modal, setModal] = useState<IModalType>({ show: false, type: "" });
+const RegisterForm = () => {
   const [registerInputs, setRegisterInputs] = useState({
     registerName: "",
     registerPassword: "",
     registerEmail: "",
   });
 
-  const changeModalState = (modalType: IModalType["type"], state = true) => {
-    setModal({ show: state, type: modalType });
-  };
-
-  const onChangeFormLogin = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setLoginInputs({ ...loginInputs, [e.target.name]: e.target.value });
-  };
-
   const onChangeFormRegister = (e: React.ChangeEvent<HTMLInputElement>) => {
     setRegisterInputs({ ...registerInputs, [e.target.name]: e.target.value });
+  };
+
+  return (
+    <form className="flex flex-col gap-5">
+      <div className="flex flex-col gap-2">
+        <label
+          htmlFor="registerName"
+          className="text-base font-medium text-gray-800"
+        >
+          name
+        </label>
+        <div className="relative">
+          <FaUserAlt className="absolute top-2 left-2.5 text-indigo-600 " />
+          <Input
+            type="text"
+            id="registerName"
+            name="registerName"
+            value={registerInputs.registerName}
+            onChange={onChangeFormRegister}
+          />
+        </div>
+      </div>
+      <div className="flex flex-col gap-2">
+        <label
+          htmlFor="registerEmail"
+          className="text-base font-medium text-gray-800"
+        >
+          email
+        </label>
+        <div className="relative">
+          <MdEmail className="absolute top-2 left-2.5 text-indigo-600 text-lg" />
+          <Input
+            type="text"
+            id="registerEmail"
+            name="registerEmail"
+            value={registerInputs.registerEmail}
+            onChange={onChangeFormRegister}
+          />
+        </div>
+      </div>
+      <div className="flex flex-col gap-2">
+        <label
+          htmlFor="registerPassword"
+          className="text-base font-medium text-gray-800"
+        >
+          password
+        </label>
+        <div className="relative">
+          <FaLock className="absolute top-2 left-2.5 text-indigo-600" />
+          <Input
+            type="password"
+            id="registerPassword"
+            name="registerPassword"
+            value={registerInputs.registerPassword}
+            onChange={onChangeFormRegister}
+          />
+        </div>
+      </div>
+      <div className="">
+        <button className="mx-auto flex items-center justify-center rounded-3xl bg-indigo-700 hover:bg-indigo-900 transition-all ease-linear duration-300 text-white px-3.5 p-1.5 text-base font-medium shadow-lg w-1/2">
+          Register
+        </button>
+      </div>
+    </form>
+  );
+};
+
+export default function RegisterLogin() {
+  const [activeTab, setActiveTab] = useState(0);
+  const [modal, setModal] = useState<IModalType>({ show: false, type: "" });
+
+  const changeModalState = (modalType: IModalType["type"], state = true) => {
+    setModal({ show: state, type: modalType });
   };
 
   return (
@@ -215,9 +315,7 @@ export default function RegisterLogin() {
               <h3 className="text-xl font-medium">Login with:</h3>
               <div className="flex gap-4 items-center">
                 {/* login icons */}
-                <TwitterIcon changeModalState={changeModalState} />
-                <FacebookIcon changeModalState={changeModalState} />
-                <GoogleIcon changeModalState={changeModalState} />
+                <LoginWith changeModalState={changeModalState} />
                 {/* twitter modal */}
                 <ModalContainer
                   modal={modal}
@@ -256,50 +354,7 @@ export default function RegisterLogin() {
                 </ModalContainer>
               </div>
             </div>
-            {/* login form */}
-            <form className="flex flex-col gap-5">
-              <div className="flex flex-col gap-2">
-                <label
-                  htmlFor="loginUsername"
-                  className="text-base font-medium text-gray-800"
-                >
-                  username
-                </label>
-                <div className="relative">
-                  <FaUserAlt className="absolute top-2 left-2.5 text-indigo-600 " />
-                  <Input
-                    type="text"
-                    id="loginUsername"
-                    name="loginUsername"
-                    value={loginInputs.loginUsername}
-                    onChange={onChangeFormLogin}
-                  />
-                </div>
-              </div>
-              <div className="flex flex-col gap-2">
-                <label
-                  htmlFor="loginPassword"
-                  className="text-base font-medium text-gray-800"
-                >
-                  password
-                </label>
-                <div className="relative">
-                  <FaLock className="absolute top-2 left-2.5 text-indigo-600" />
-                  <Input
-                    type="password"
-                    id="loginPassword"
-                    name="loginPassword"
-                    value={loginInputs.loginPassword}
-                    onChange={onChangeFormLogin}
-                  />
-                </div>
-              </div>
-              <div className="">
-                <button className="mx-auto flex items-center justify-center rounded-3xl bg-indigo-700 hover:bg-indigo-900 transition-all ease-linear duration-300 text-white px-3.5 p-1.5 text-base font-medium shadow-lg w-1/2">
-                  Log In
-                </button>
-              </div>
-            </form>
+            <LoginForm />
           </div>
           {/* register form */}
           <div
@@ -311,9 +366,7 @@ export default function RegisterLogin() {
               <h3 className="text-xl font-medium">Register with:</h3>
               <div className="flex gap-4 items-center">
                 {/* login icons */}
-                <TwitterIcon changeModalState={changeModalState} />
-                <FacebookIcon changeModalState={changeModalState} />
-                <GoogleIcon changeModalState={changeModalState} />
+                <LoginWith changeModalState={changeModalState} />
                 {/* twitter modal */}
                 <ModalContainer
                   modal={modal}
@@ -353,67 +406,7 @@ export default function RegisterLogin() {
               </div>
             </div>
 
-            <form className="flex flex-col gap-5">
-              <div className="flex flex-col gap-2">
-                <label
-                  htmlFor="registerName"
-                  className="text-base font-medium text-gray-800"
-                >
-                  name
-                </label>
-                <div className="relative">
-                  <FaUserAlt className="absolute top-2 left-2.5 text-indigo-600 " />
-                  <Input
-                    type="text"
-                    id="registerName"
-                    name="registerName"
-                    value={registerInputs.registerName}
-                    onChange={onChangeFormRegister}
-                  />
-                </div>
-              </div>
-              <div className="flex flex-col gap-2">
-                <label
-                  htmlFor="registerEmail"
-                  className="text-base font-medium text-gray-800"
-                >
-                  email
-                </label>
-                <div className="relative">
-                  <MdEmail className="absolute top-2 left-2.5 text-indigo-600 text-lg" />
-                  <Input
-                    type="text"
-                    id="registerEmail"
-                    name="registerEmail"
-                    value={registerInputs.registerEmail}
-                    onChange={onChangeFormRegister}
-                  />
-                </div>
-              </div>
-              <div className="flex flex-col gap-2">
-                <label
-                  htmlFor="registerPassword"
-                  className="text-base font-medium text-gray-800"
-                >
-                  password
-                </label>
-                <div className="relative">
-                  <FaLock className="absolute top-2 left-2.5 text-indigo-600" />
-                  <Input
-                    type="password"
-                    id="registerPassword"
-                    name="registerPassword"
-                    value={registerInputs.registerPassword}
-                    onChange={onChangeFormRegister}
-                  />
-                </div>
-              </div>
-              <div className="">
-                <button className="mx-auto flex items-center justify-center rounded-3xl bg-indigo-700 hover:bg-indigo-900 transition-all ease-linear duration-300 text-white px-3.5 p-1.5 text-base font-medium shadow-lg w-1/2">
-                  Register
-                </button>
-              </div>
-            </form>
+            <RegisterForm />
           </div>
         </div>
       </main>
