@@ -17,12 +17,14 @@ body {
   flex-direction: column;
   gap: 2px;
   position: fixed;
-  width: 90px;
-  height: 500px;
+  // width: 90px;
+  // height: 500px;
+  padding: 0px 8px;
   background-color: $FIRST_COLOR;
   border-top-right-radius: $BORDER_RADIUS_5;
   border-bottom-right-radius: $BORDER_RADIUS_5;
   overflow-y: auto;
+  z-index: 10;
   @include transition(all linear 0.3s);
 
   a {
@@ -74,8 +76,9 @@ body {
 /* vertical menu */
 
 .h1-top {
-  margin-top: 100px;
+  margin-top: 20px;
   text-align: center;
+  font-size: 30px;
   color: black;
 }
 
