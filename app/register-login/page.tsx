@@ -1,13 +1,8 @@
 "use client";
 import { MouseEvent, useState } from "react";
-import { FaUserAlt } from "react-icons/fa";
-import { FaLock } from "react-icons/fa";
+import { FaFacebookF, FaGoogle, FaLock, FaUserAlt } from "react-icons/fa";
+import { BsFacebook, BsGoogle, BsTwitter } from "react-icons/bs";
 import { MdEmail } from "react-icons/md";
-import { FaFacebookF } from "react-icons/fa";
-import { FaGoogle } from "react-icons/fa";
-import { BsFacebook } from "react-icons/bs";
-import { BsGoogle } from "react-icons/bs";
-import { BsTwitter } from "react-icons/bs";
 
 interface IModalType {
   show: boolean;
@@ -287,8 +282,8 @@ export default function RegisterLogin() {
   };
 
   return (
-    <div className="bg-gradient-to-r from-red-500 to-indigo-600 h-screen overflow-hidden flex justify-center items-center">
-      <main className="border border-gray-300 bg-white bg-opacity-50 p-4 rounded-2xl max-w-2xl w-full">
+    <main className="bg-gradient-to-r from-red-500 to-indigo-600 h-screen overflow-hidden flex justify-center items-center">
+      <section className="border border-gray-300 bg-white bg-opacity-50 p-4 rounded-2xl max-w-2xl w-full">
         <ul className="flex flex-row justify-center items-center text-lg mb-8 text-blue-600">
           <TabTitle
             setActiveTab={setActiveTab}
@@ -409,7 +404,7 @@ export default function RegisterLogin() {
             <RegisterForm />
           </div>
         </div>
-      </main>
-    </div>
+      </section>
+    </main>
   );
 }
