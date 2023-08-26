@@ -1,0 +1,33 @@
+@mixin flexLayout($align: center) {
+  display: flex;
+  justify-content: center;
+  align-items: $align;
+}
+
+@mixin transition($param...) {
+  -webkit-transition: $param;
+  -o-transition: $param;
+  -moz-transition: $param;
+  transition: $param;
+}
+
+@mixin transform($param...) {
+  -webkit-transform: $param;
+  -o-transform: $param;
+  -moz-transform: $param;
+  -ms-transform: $param;
+  transform: $param;
+}
+
+@mixin transform-origin($params...) {
+  -o-transform-origin: $params;
+  -moz-transform-origin: $params;
+  -webkit-transform-origin: $params;
+  -ms-transform-origin: $params;
+  transform-origin: $params;
+}
+
+@mixin filter($params...) {
+  -webkit-filter: $params;
+  filter: $params;
+}
