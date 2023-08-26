@@ -14,7 +14,7 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## html css mini project 
+## html css mini project
 
 ## birthday
 
@@ -33,3 +33,8 @@ Open [http://localhost:3000/register-login](http://localhost:3000/register-login
 see a simple simulation of song playing in /app/song-wave
 
 Open [http://localhost:3000/song-wave](http://localhost:3000/song-wave) with your browser to see
+
+# card
+
+see some simple card transition animation with html & scss
+Open [http://localhost:3000/card](http://localhost:3000/card) with your browser to see
