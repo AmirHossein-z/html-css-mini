@@ -1,6 +1,6 @@
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-## Getting Started
+# Getting Started
 
 First, run the development server:
 
@@ -34,7 +34,12 @@ see a simple simulation of song playing in /app/song-wave
 
 Open [http://localhost:3000/song-wave](http://localhost:3000/song-wave) with your browser to see
 
-# card
+## card
 
 see some simple card transition animation with html & scss
+
+#### Note
+
+this isn't responsive!
+
 Open [http://localhost:3000/card](http://localhost:3000/card) with your browser to see
