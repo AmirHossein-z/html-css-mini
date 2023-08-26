@@ -43,3 +43,17 @@ see some simple card transition animation with html & scss
 this isn't responsive!
 
 Open [http://localhost:3000/card](http://localhost:3000/card) with your browser to see
+
+## Authors
+
+-   [@Amirhossein_Zareian](https://github.com/AmirHossein-z)
+
+## Contributing
+
+Contributions are always welcome!
+
+Please Pull request to see your recommendations.
+
+## License
+
+[MIT](https://choosealicense.com/licenses/mit/)
