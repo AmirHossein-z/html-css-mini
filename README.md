@@ -1,6 +1,6 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# html css mini project
 
-# Getting Started
+## Getting Started
 
 First, run the development server:
 
@@ -14,7 +14,7 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## html css mini project
+
 
 ## birthday
 
@@ -43,6 +43,8 @@ see some simple card transition animation with html & scss
 this isn't responsive!
 
 Open [http://localhost:3000/card](http://localhost:3000/card) with your browser to see
+
+This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Authors
 
