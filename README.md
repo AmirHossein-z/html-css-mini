@@ -38,15 +38,13 @@ Open [http://localhost:3000/song-wave](http://localhost:3000/song-wave) with you
 
 see some simple card transition animation with html & scss
 
-#### Note
-
-this isn't responsive!
+#### NOTE: this page isn't responsive!
 
 Open [http://localhost:3000/card](http://localhost:3000/card) with your browser to see
 
 ## Acknowledgements
 
--   [Next.js]([https://nextjs.org/])
+-   [Next.js](https://nextjs.org/)
 
 ## Authors
 
