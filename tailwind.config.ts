@@ -8,6 +8,11 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      colors: {
+        "bright-turquoise": "#08D9D6",
+        "radical-red": "#FF2E63",
+        gallery: "#EAEAEA",
+      },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-conic":
@@ -15,6 +20,7 @@ const config: Config = {
       },
       boxShadow: {
         glass: "inset 0px 2px 22px 0px rgba(255,255,255,0.6)",
+        blue: "0px 0px 7px 0px rgba(8, 217, 214, 0.87)",
       },
       animation: {
         fade_in_from_right: "fade_in_from_right 700ms 1",
