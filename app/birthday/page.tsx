@@ -32,7 +32,7 @@ export default function Birthday() {
   return (
     <section
       id="div1"
-      className="flex flex-col w-full justify-center items-center mt-[100px] bg-black m-0 p-0 box-border"
+      className="flex flex-col w-full justify-center items-center mt-[100px] m-0 p-0 box-border"
     >
       <span onClick={(e) => partyfunction(e.target)} ref={span1}></span>
       {/* <p className="text-3xl font-bold back sm:text-4xl md:text-5xl lg:text-[50px] xl:text-[53px]">Happy Programmer&apos;s Day :)</p> */}

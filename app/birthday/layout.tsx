@@ -18,8 +18,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={scholarlyAmbition.className}>{children}</body>
+    <html lang="fa-IR">
+      <body className={`${scholarlyAmbition.className} bg-black`}>
+        {children}
+      </body>
     </html>
   );
 }
