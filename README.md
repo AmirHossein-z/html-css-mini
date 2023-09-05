@@ -14,8 +14,6 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-
-
 ## birthday
 
 access birthday code in /app/birthday
@@ -42,13 +40,19 @@ see some simple card transition animation with html & scss
 
 Open [http://localhost:3000/card](http://localhost:3000/card) with your browser to see
 
+## form-validation (quera.ir)
+
+see a simple form validation I solved from quera.ir
+
+Open [http://localhost:3000/form-validation-quera](http://localhost:3000/form-validation-quera) with your browser to see
+
 ## Acknowledgements
 
--   [Next.js](https://nextjs.org/)
+- [Next.js](https://nextjs.org/)
 
 ## Authors
 
--   [@Amirhossein_Zareian](https://github.com/AmirHossein-z)
+- [@Amirhossein_Zareian](https://github.com/AmirHossein-z)
 
 ## Contributing
 
