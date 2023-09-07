@@ -1,120 +1,118 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>index</title>
-        <link
-            href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap"
-            rel="stylesheet"
-        />
-        <link rel="stylesheet" href="tailwind/style.css" />
-        <script
-            src="https://kit.fontawesome.com/cf36ff6fd8.js"
-            crossorigin="anonymous"
-        ></script>
-    </head>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>index</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="tailwind/style.css" />
+    <script
+      src="https://kit.fontawesome.com/cf36ff6fd8.js"
+      crossorigin="anonymous"
+    ></script>
+  </head>
 
-    <body class="h-[100vh]">
-        <div class="container grid">
-            <h1
-                class="text-white text-center text-base sm:text-xl md:text-3xl m-3 p-1 italic"
-            >
-                List persons
-            </h1>
-            <form
-                action=""
-                id="form1"
-                class="flex items-center justify-center gap-5 my-5"
-            >
-                <div class="flex flex-col sm:flex-row">
-                    <div
-                        class="flex justify-center text-white my-1 sm:my-0 sm:mx-2"
-                    >
-                        <input
-                            type="text"
-                            id="firstName"
-                            name="firstName"
-                            placeholder="Enter first name here..."
-                            class="bg-transparent rounded-sm p-1 sm:p-1.5 focus:outline-1 focus:outline border border-white border-opacity-20 focus:border-none placeholder:text-white placeholder:text-opacity-50 placeholder:text-xs md:placeholder:text-sm"
-                        />
-                    </div>
-                    <div class="flex justify-center text-white my-1 sm:my-0">
-                        <input
-                            type="text"
-                            id="lastName"
-                            name="lastName"
-                            placeholder="Enter last name here..."
-                            class="bg-transparent rounded-sm p-1 sm:p-1.5 focus:outline-1 focus:outline border border-white border-opacity-20 focus:border-none placeholder:text-white placeholder:text-opacity-50 placeholder:text-xs md:placeholder:text-sm"
-                        />
-                    </div>
-                </div>
-                <div>
-                    <button
-                        type="submit"
-                        id="addButton"
-                        name="addButton"
-                        class="cursor-pointer bg-green-500 py-1 px-2 sm:py-1.5 sm:px-3 md:px-3.5 rounded-sm text-lime-50 hover:bg-green-900 transition-all duration-300"
-                    >
-                        <i class="fa-solid fa-plus"></i>
-                    </button>
-                </div>
-            </form>
-            <div
-                class="flex flex-col sm:flex-row justify-center items-center sm:justify-end sm:items-center gap-2 my-3"
-            >
-                <div class="flex gap-2">
-                    <button
-                        id="deleteSelected"
-                        class="bg-rose-500 py-1 px-2 sm:py-1.5 md:py-2 sm:px-3 md:px-4 rounded-sm text-lime-50 hover:bg-rose-900 transition-all duration-300 hidden"
-                        onclick="deleteSelectedPerson(event)"
-                    >
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
-                    <button
-                        class="bg-zinc-700 py-1 px-2 sm:py-1.5 md:py-2 sm:px-3 md:px-4 rounded-sm text-lime-50 hover:bg-zinc-900 transition-all duration-300"
-                        id="filterButton"
-                    >
-                        <i class="fa-solid fa-list"></i>
-                    </button>
-                </div>
-                <div class="flex justify-center m-1 text-white">
-                    <input
-                        type="text"
-                        id="searchInput"
-                        name="searchInput"
-                        class="bg-transparent rounded-sm p-1 sm:p-1.5 md:p-2 mx-1 focus:outline focus:outline-1 focus:outline-yellow-100 placeholder:text-white placeholder:text-opacity-50 placeholder:text-xs md:placeholder:text-sm border border-white border-opacity-20 focus:border-none"
-                        placeholder="Search name here..."
-                    />
-                </div>
-            </div>
-            <table
-                id="showInfoTable"
-                class="text-white table-auto grid w-full sm:w-3/4 max-h-80 p-1 sm:p-3 backdrop-blur-sm overflow-y-scroll"
-            >
-                <thead>
-                    <tr
-                        class="flex justify-between p-1 sm:p-1.5 border-b border-gray-50 border-opacity-10 text-xs sm:text-base"
-                    >
-                        <th class="p-1 sm:p-1.5">
-                            <input
-                                type="checkbox"
-                                id="allPerson"
-                                name="allPerson"
-                                class=""
-                                onchange="checkAllPerson(event)"
-                            />
-                        </th>
-                        <th class="p-1 sm:p-1.5">First name</th>
-                        <th class="p-1 sm:p-1.5">Last name</th>
-                        <th class="p-1 sm:p-1.5">Operations</th>
-                    </tr>
-                </thead>
-                <tbody class=""></tbody>
-            </table>
+  <body class="h-[100vh]">
+    <div class="container grid">
+      <h1
+        class="text-white text-center text-base sm:text-xl md:text-3xl m-3 p-1 italic"
+      >
+        List persons
+      </h1>
+      <form
+        action=""
+        id="form1"
+        class="flex items-center justify-center gap-5 my-5"
+      >
+        <div class="flex flex-col sm:flex-row">
+          <div class="flex justify-center text-white my-1 sm:my-0 sm:mx-2">
+            <input
+              type="text"
+              id="firstName"
+              name="firstName"
+              placeholder="Enter first name here..."
+              class="bg-transparent rounded-sm p-1 sm:p-1.5 focus:outline-1 focus:outline border border-white border-opacity-20 focus:border-none placeholder:text-white placeholder:text-opacity-50 placeholder:text-xs md:placeholder:text-sm"
+            />
+          </div>
+          <div class="flex justify-center text-white my-1 sm:my-0">
+            <input
+              type="text"
+              id="lastName"
+              name="lastName"
+              placeholder="Enter last name here..."
+              class="bg-transparent rounded-sm p-1 sm:p-1.5 focus:outline-1 focus:outline border border-white border-opacity-20 focus:border-none placeholder:text-white placeholder:text-opacity-50 placeholder:text-xs md:placeholder:text-sm"
+            />
+          </div>
         </div>
-    </body>
+        <div>
+          <button
+            type="submit"
+            id="addButton"
+            name="addButton"
+            class="cursor-pointer bg-green-500 py-1 px-2 sm:py-1.5 sm:px-3 md:px-3.5 rounded-sm text-lime-50 hover:bg-green-900 transition-all duration-300"
+          >
+            <i class="fa-solid fa-plus"></i>
+          </button>
+        </div>
+      </form>
+      <div
+        class="flex flex-col sm:flex-row justify-center items-center sm:justify-end sm:items-center gap-2 my-3"
+      >
+        <div class="flex gap-2">
+          <button
+            id="deleteSelected"
+            class="bg-rose-500 py-1 px-2 sm:py-1.5 md:py-2 sm:px-3 md:px-4 rounded-sm text-lime-50 hover:bg-rose-900 transition-all duration-300 hidden"
+            onclick="deleteSelectedPerson(event)"
+          >
+            <i class="fa-solid fa-trash"></i>
+          </button>
+          <button
+            class="bg-zinc-700 py-1 px-2 sm:py-1.5 md:py-2 sm:px-3 md:px-4 rounded-sm text-lime-50 hover:bg-zinc-900 transition-all duration-300"
+            id="filterButton"
+          >
+            <i class="fa-solid fa-list"></i>
+          </button>
+        </div>
+        <div class="flex justify-center m-1 text-white">
+          <input
+            type="text"
+            id="searchInput"
+            name="searchInput"
+            class="bg-transparent rounded-sm p-1 sm:p-1.5 md:p-2 mx-1 focus:outline focus:outline-1 focus:outline-yellow-100 placeholder:text-white placeholder:text-opacity-50 placeholder:text-xs md:placeholder:text-sm border border-white border-opacity-20 focus:border-none"
+            placeholder="Search name here..."
+          />
+        </div>
+      </div>
+      <table
+        id="showInfoTable"
+        class="text-white table-auto grid w-full sm:w-3/4 max-h-80 p-1 sm:p-3 backdrop-blur-sm overflow-y-scroll"
+      >
+        <thead>
+          <tr
+            class="flex justify-between p-1 sm:p-1.5 border-b border-gray-50 border-opacity-10 text-xs sm:text-base"
+          >
+            <th class="p-1 sm:p-1.5">
+              <input
+                type="checkbox"
+                id="allPerson"
+                name="allPerson"
+                class=""
+                onchange="checkAllPerson(event)"
+              />
+            </th>
+            <th class="p-1 sm:p-1.5">First name</th>
+            <th class="p-1 sm:p-1.5">Last name</th>
+            <th class="p-1 sm:p-1.5">Operations</th>
+          </tr>
+        </thead>
+        <tbody class=""></tbody>
+      </table>
+    </div>
+  </body>
 
-    <script src="node_modules/sweetalert2/dist/sweetalert2.all.min.js"></script>
-    <script src="script/main.js"></script>
+  <script src="node_modules/sweetalert2/dist/sweetalert2.all.min.js"></script>
+  <script src="script/main.js"></script>
 </html>

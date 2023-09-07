@@ -17,6 +17,7 @@ const config: Config = {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-conic":
           "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
+        "sky-cloudy": "url(/images/sky-cloudy.jpg)",
       },
       boxShadow: {
         glass: "inset 0px 2px 22px 0px rgba(255,255,255,0.6)",

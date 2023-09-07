@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
-import "../globals.css";
-// import localFont from "next/font/local";
+import "./../globals.css";
 import { Roboto } from "next/font/google";
 
 export const metadata: Metadata = {
-  title: "caesar cipher",
+  title: "list person",
 };
 
 const roboto = Roboto({
@@ -18,8 +17,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="fa-IR">
-      <body className={`bg-[#252A34] ${roboto.className}`}>{children}</body>
+    <html lang="en">
+      <body
+        className={`bg-cover bg-no-repeat h-screen bg-sky-cloudy ${roboto.className}`}
+      >
+        {children}
+      </body>
     </html>
   );
 }
