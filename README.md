@@ -46,6 +46,12 @@ see a simple form validation I solved from quera.ir
 
 Open [http://localhost:3000/form-validation-quera](http://localhost:3000/form-validation-quera) with your browser to see
 
+## list-person
+
+see list of persons with add,edit,delete,search,filter feature saved in localStorage
+
+Open [http://localhost:3000/list-person](http://localhost:3000/list-person) with your browser to see
+
 ## Acknowledgements
 
 - [Next.js](https://nextjs.org/)

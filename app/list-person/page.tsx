@@ -1,37 +1,55 @@
 "use client";
 
-import { ChangeEvent, FormEvent, MouseEvent, useState } from "react";
+import { ChangeEvent, FormEvent, MouseEvent, useEffect, useState } from "react";
 import { GoPersonAdd } from "react-icons/go";
 import { BsTrash3Fill } from "react-icons/bs";
 import { MdEdit, MdOutlineDone } from "react-icons/md";
 import { nanoid } from "nanoid";
+import { useRouter } from "next/navigation";
+import { useSearchParams, usePathname } from "next/navigation";
 
-type IOperation = "add" | "edit";
+type IOperation = "add" | "edit" | "delete";
 interface IPerson {
   id: string;
   firstName: string;
   lastName: string;
 }
 
-const getPersonsListFromLS = (): Array<IPerson> => {
-  const personsJSON = localStorage.getItem("listPersons");
-  return personsJSON ? JSON.parse(personsJSON) : [];
-};
-
 export default function ListPerson() {
   const [firstName, setFirstName] = useState({ value: "", styles: "" });
   const [lastName, setLastName] = useState({ value: "", styles: "" });
   const [operation, setOperation] = useState<IOperation>("add");
-  const [persons, setPersons] = useState<IPerson[]>(getPersonsListFromLS());
   const [checkingIds, setCheckingIds] = useState<string[]>([]);
+  const [persons, setPersons] = useState<IPerson[]>([]);
+  const [filteredPersons, setFilteredPersons] = useState<IPerson[]>([]);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const params = new URLSearchParams(searchParams);
+  const [search, setSearch] = useState(params.get("search") ?? "");
 
-  const deleteFromLS = (id: string) => {
+  const getPersonsListFromLS = (): Array<IPerson> => {
+    const personsJSON = localStorage.getItem("listPersons");
+    return personsJSON ? JSON.parse(personsJSON) : [];
+  };
+
+  useEffect(() => {
+    setPersons(getPersonsListFromLS());
+  }, []);
+
+  const deleteOneFromLS = (id: string) => {
     const ps = getPersonsListFromLS();
     ps.splice(
       ps.findIndex((p) => p.id === id),
       1
     );
     localStorage.setItem("listPersons", JSON.stringify(ps));
+  };
+
+  const deleteManyFromLS = (ids: string[]) => {
+    const ps = getPersonsListFromLS();
+    const newPersons = ps.filter((p) => !ids.includes(p.id));
+    localStorage.setItem("listPersons", JSON.stringify(newPersons));
   };
 
   const isSimilar = (obj: { firstName: string; lastName: string }) => {
@@ -96,13 +114,15 @@ export default function ListPerson() {
   const checkAllPerson = () => {
     if (isAllChecked()) {
       setCheckingIds([]);
+      setOperation("add");
     } else {
       const personIds = persons.map((p) => p.id);
       setCheckingIds(personIds);
+      setOperation("delete");
     }
+    setFirstName({ value: "", styles: "" });
+    setLastName({ value: "", styles: "" });
   };
-
-  const deleteSelectedPerson = (e: MouseEvent<HTMLButtonElement>) => {};
 
   const deletePerson = (id: string) => {
     const copyPerson = [...persons];
@@ -111,7 +131,7 @@ export default function ListPerson() {
       1
     );
     setPersons(copyPerson);
-    deleteFromLS(id);
+    deleteOneFromLS(id);
     setCheckingIds([]);
     setFirstName({ value: "", styles: "" });
     setLastName({ value: "", styles: "" });
@@ -123,8 +143,6 @@ export default function ListPerson() {
     setFirstName({ value: person.firstName, styles: "" });
     setLastName({ value: person.lastName, styles: "" });
   };
-
-  const selectPersonForDelete = (e: ChangeEvent<HTMLInputElement>) => {};
 
   const addToLocalStorage = (person: IPerson) => {
     const ps = getPersonsListFromLS();
@@ -162,21 +180,56 @@ export default function ListPerson() {
         firstName: firstName.value,
         lastName: lastName.value,
       };
-      deleteFromLS(checkingIds[0]);
+      deleteOneFromLS(checkingIds[0]);
       addToLocalStorage(newPerson);
       setPersons([...copy, newPerson]);
       setCheckingIds([]);
+      setOperation("add");
+      setFirstName({ styles: "", value: "" });
+      setLastName({ styles: "", value: "" });
+    } else if (operation === "delete" && checkingIds.length > 0) {
+      const copy = [...persons];
+      const newPersons = copy.filter((p) => !checkingIds.includes(p.id));
+
+      deleteManyFromLS([...checkingIds]);
+      setPersons(newPersons);
+      setOperation("add");
     }
   };
 
   const handleChecking = (id: string) => {
     if (!checkingIds.includes(id)) {
       setCheckingIds([...checkingIds, id]);
+      setOperation("delete");
     } else {
+      if (checkingIds.length === 1) {
+        setOperation("add");
+      }
       const copy = [...checkingIds];
-      copy.splice(copy.indexOf(id));
+      copy.splice(copy.indexOf(id), 1);
       setCheckingIds(copy);
     }
+    setFirstName({ styles: "", value: "" });
+    setLastName({ styles: "", value: "" });
+  };
+
+  const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
+    setSearch(e.target.value);
+  };
+
+  const submitSearch = (e: MouseEvent<HTMLButtonElement>) => {
+    const filtered = persons.filter(
+      (p) => search.includes(p.firstName) || search.includes(p.lastName)
+    );
+    if (search.length === 0) {
+      setFilteredPersons(persons);
+    } else if (filtered.length === 0) {
+      setFilteredPersons([]);
+    } else {
+      setFilteredPersons(filtered);
+    }
+    params.set("search", search);
+    router.push(pathname + "?" + params.toString());
   };
 
   return (
@@ -184,7 +237,6 @@ export default function ListPerson() {
       <h1 className="text-center text-base sm:text-xl md:text-3xl m-3 p-1 text-blue-200">
         List persons
       </h1>
-      n{" "}
       <form
         onSubmit={handleSubmit}
         className="flex items-center justify-center gap-5 my-5"
@@ -218,30 +270,34 @@ export default function ListPerson() {
             type="submit"
             id="addButton"
             name="addButton"
-            className="cursor-pointer bg-green-500 py-1 px-2 sm:py-1.5 sm:px-3 md:px-3.5 rounded-sm text-lime-50 hover:bg-green-900 transition-all duration-300 focus:outline-green-500 focus:border-none outline-none"
+            className={`cursor-pointer ${
+              operation === "add"
+                ? "bg-green-500 hover:bg-green-900 focus:outline-green-500"
+                : operation === "edit"
+                ? "bg-yellow-500 hover:bg-yellow-900 focus:outline-yellow-900"
+                : operation === "delete"
+                ? "bg-red-500 hover:bg-red-900 focus:outline-red-900"
+                : ""
+            } bg-green-500 py-1 px-2 sm:py-1.5 sm:px-3 md:px-3.5 rounded-sm text-lime-50 transition-all duration-300 focus:border-none outline-none`}
           >
             {operation === "add" ? (
               <GoPersonAdd className="text-2xl" />
             ) : operation === "edit" ? (
               <MdOutlineDone className="text-2xl" />
+            ) : operation === "delete" ? (
+              <BsTrash3Fill className="text-2xl" />
             ) : null}
           </button>
         </div>
       </form>
-      <div className="flex flex-col sm:flex-row justify-center items-center sm:justify-end sm:items-center gap-2 my-3">
+      <div className="flex flex-col sm:flex-row justify-center items-center gap-2 my-3">
         <div className="flex gap-2">
-          <button
-            id="deleteSelected"
-            className="bg-rose-500 py-1 px-2 sm:py-1.5 md:py-2 sm:px-3 md:px-4 rounded-sm text-lime-50 hover:bg-rose-900 transition-all duration-300 hidden"
-            onClick={(e) => deleteSelectedPerson(e)}
-          >
-            <BsTrash3Fill />
-          </button>
           <button
             className="bg-zinc-700 py-1 px-2 sm:py-1.5 md:py-2 sm:px-3 md:px-4 rounded-sm text-lime-50 hover:bg-zinc-900 transition-all duration-300"
             id="filterButton"
           >
-            <i className="fa-solid fa-list"></i>
+            {/* <FiSearch /> */}
+            filter
           </button>
         </div>
         <div className="flex justify-center m-1 text-white">
@@ -251,7 +307,16 @@ export default function ListPerson() {
             name="searchInput"
             className="transition-all duration-200 ease-in bg-transparent rounded-sm p-1 sm:p-1.5 md:p-2 mx-1 outline-none focus:outline-none focus:border-yellow-100 placeholder:text-white placeholder:text-opacity-50 placeholder:text-xs md:placeholder:text-sm border border-white border-opacity-20"
             placeholder="Search name here..."
+            value={search}
+            onChange={(e) => handleSearch(e)}
           />
+          <button
+            type="button"
+            onClick={(e) => submitSearch(e)}
+            className="bg-zinc-700 py-1 px-2 sm:py-1.5 md:py-2 sm:px-3 md:px-4 rounded-sm text-lime-50 hover:bg-zinc-900 transition-all duration-300"
+          >
+            search
+          </button>
         </div>
       </div>
       <table
@@ -276,62 +341,78 @@ export default function ListPerson() {
           </tr>
         </thead>
         <tbody className="">
-          {persons.length > 0 &&
-            persons.map((person) => (
-              <tr
-                key={person.id}
-                className={`${
-                  checkingIds.includes(person.id) ? "bg-gray-700" : ""
-                } animate-fade_in_from_bottom flex justify-between cursor-pointer text-center text-xs sm:text-base p-1 sm:p-1.5 border-b border-gray-50 border-opacity-10 transition-all duration-300 hover:bg-gray-600`}
-              >
-                <td className="p-1 sm:p-1.5">
-                  <input
-                    type="checkbox"
-                    checked={checkingIds.includes(person.id)}
-                    onChange={() => handleChecking(person.id)}
-                  />
-                </td>
-                <td className="p-1 sm:p-1.5">{person.firstName}</td>
-                <td className="p-1 sm:p-1.5">{person.lastName}</td>
-                <td className="p-1 sm:p-1.5 flex items-center gap-5 justify-center min-w-[15%]">
-                  <button
-                    type="button"
-                    className="text-red-700 hover:text-red-900 text-xs sm:text-sm"
-                    onClick={() => deletePerson(person.id)}
-                  >
-                    <BsTrash3Fill size="20px" />
-                  </button>
-                  {"    "}
-                  <button
-                    type="button"
-                    className="text-yellow-400 hover:text-yellow-700 text-xs sm:text-sm"
-                    onClick={() => editPerson(person)}
-                  >
-                    <MdEdit size="20px" />
-                  </button>
-                </td>
-              </tr>
-            ))}
+          {filteredPersons.length > 0
+            ? filteredPersons.map((person) => (
+                <PersonData
+                  key={person.id}
+                  checkingIds={checkingIds}
+                  person={person}
+                  handleChecking={handleChecking}
+                  deletePerson={deletePerson}
+                  editPerson={editPerson}
+                />
+              ))
+            : null}
         </tbody>
       </table>
     </div>
   );
 }
 
-// let form1 = document.querySelector("#form1");
-// let addButton = form1.addButton;
-// let deleteButton = document.querySelector("#deleteSelected");
-// let searchInput = document.querySelector("#searchInput");
-// let filterButton = document.querySelector("#filterButton");
+interface IPersonDataProps {
+  person: IPerson;
+  checkingIds: string[];
+  handleChecking: (id: string) => void;
+  deletePerson: (id: string) => void;
+  editPerson: (person: IPerson) => void;
+}
 
-// // triggers with every change in first name & last name input
-// form1.firstName.addEventListener("input", isValidName.bind(null, "firstName"));
-// form1.lastName.addEventListener("input", isValidName.bind(null, "lastName"));
+const PersonData = ({
+  person,
+  checkingIds,
+  handleChecking,
+  deletePerson,
+  editPerson,
+}: IPersonDataProps) => {
+  return (
+    <tr
+      className={`${
+        checkingIds.includes(person.id) ? "bg-gray-700" : ""
+      } animate-fade_in_from_bottom flex justify-between cursor-pointer text-center text-xs sm:text-base p-1 sm:p-1.5 border-b border-gray-50 border-opacity-10 transition-all duration-300 hover:bg-gray-600`}
+    >
+      <td className="p-1 sm:p-1.5">
+        <input
+          type="checkbox"
+          checked={checkingIds.includes(person.id)}
+          onChange={() => handleChecking(person.id)}
+        />
+      </td>
+      <td className="p-1 sm:p-1.5">{person.firstName}</td>
+      <td className="p-1 sm:p-1.5">{person.lastName}</td>
+      <td className="p-1 sm:p-1.5 flex items-center gap-5 justify-center min-w-[15%]">
+        <button
+          type="button"
+          className="text-red-700 hover:text-red-900 text-xs sm:text-sm"
+          onClick={() => deletePerson(person.id)}
+        >
+          <BsTrash3Fill size="20px" />
+        </button>
+        {"    "}
+        <button
+          type="button"
+          className="text-yellow-400 hover:text-yellow-700 text-xs sm:text-sm"
+          onClick={() => editPerson(person)}
+        >
+          <MdEdit size="20px" />
+        </button>
+      </td>
+    </tr>
+  );
+};
 // // triggers with every change in search input
 // searchInput.addEventListener("input", searchPersons);
 // filterButton.addEventListener("click", filterPersons);
 // // when DOM and styles loaded,then persons saved in local Storage should be fetched
-// document.addEventListener("DOMContentLoaded", loadListPersons);
 
 // function filterPersons(event) {
 //     let table = document.querySelector("#showInfoTable > tbody");
@@ -381,131 +462,4 @@ export default function ListPerson() {
 //         if (searchInput.value) searchPersons({ target: searchInput });
 //         console.log(searchInput.value !== "");
 //     }
-// }
-
-// function searchPersons(event) {
-//     let persons = document.querySelectorAll("#showInfoTable > tbody > tr");
-
-//     // if desired text is matched with first name or last name of each person
-//     // that person should be displayed to user
-//     for (let index of persons.keys()) {
-//         if (
-//             persons[index].children[1].innerHTML
-//                 .toLowerCase()
-//                 .includes(event.target.value.toLowerCase()) ||
-//             persons[index].children[2].innerHTML
-//                 .toLowerCase()
-//                 .includes(event.target.value.toLowerCase())
-//         )
-//             persons[index].classList.remove("hidden");
-//         else persons[index].classList.add("hidden");
-//     }
-// }
-
-// function selectPersonForDelete(event) {
-//     let checkboxAll = document.querySelector("#allPerson");
-//     if (event.target.checked) {
-//         let tr = event.target.closest("tr");
-//         tr.classList.add("bg-gray-700");
-//         //  hidden oprations that relate to this person
-//         tr.children[tr.children.length - 1].classList.add("invisible");
-//         // show delete selected person button
-//         deleteButton.classList.remove("hidden");
-//         addButton.classList.add("hidden");
-//         filterButton.classList.add("hidden");
-
-//         // find all checkboxes that aren't checked
-//         // and if nothing is found ,then checkbox of table should be checked
-//         let arr = Array.from(
-//             document.querySelectorAll(
-//                 "#showInfoTable > tbody > tr > td:first-child > input"
-//             )
-//         ).filter((item) => !item.checked);
-//         if (arr.length === 0) {
-//             checkboxAll.checked = true;
-//         }
-//     } else {
-//         // if one of person's checkboxes aren't checked
-//         // then surly checkbox of table shouldn't be checked
-//         checkboxAll.checked = false;
-//         let tr = event.target.closest("tr");
-//         tr.classList.remove("bg-gray-700");
-//         //  show oprations that relate to this tr
-//         tr.children[tr.children.length - 1].classList.remove("invisible");
-
-//         // find all checkboxes that are checked
-//         // and if nothing is found ,then user removed all
-//         // checkboxes of all persons and delete selected button
-//         // should be hidden
-//         let itemChecked = Array.from(
-//             document.querySelectorAll(
-//                 "#showInfoTable > tbody > tr > td:first-child > input"
-//             )
-//         ).filter((item) => item.checked);
-//         if (itemChecked.length === 0) {
-//             // hidden delete selected person button
-//             deleteButton.classList.add("hidden");
-//             addButton.classList.remove("hidden");
-//             filterButton.classList.remove("hidden");
-//         }
-//     }
-// }
-
-// function deleteSelectedPerson(event) {
-//     // using beautiful alert from sweetalert2
-//     Swal.fire({
-//         title: "Are you sure to want to delete?",
-//         showCancelButton: true,
-//         confirmButtonColor: "#4CAF50",
-//         cancelButtonColor: "#FF5252",
-//         confirmButtonText: "Yes",
-//     }).then((result) => {
-//         // delete all selected person from user
-//         if (result.isConfirmed) {
-//             let checkBoxInput = document.querySelectorAll(
-//                 "#showInfoTable > tbody > tr > td:first-child > input"
-//             );
-//             for (let item of checkBoxInput) {
-//                 if (item.checked) {
-//                     let tr = item.closest("tr");
-//                     deleteFromLocalStorage({
-//                         firstName: tr.children[1].innerHTML,
-//                         lastName: tr.children[2].innerHTML,
-//                     });
-//                     tr.remove();
-//                 }
-//             }
-//             // deleteButton.classList.add("hidden");
-
-//             addButton.classList.remove("hidden");
-//             filterButton.classList.remove("hidden");
-//             event.target.closest("button").classList.add("hidden");
-//             document.querySelector("#allPerson").checked = false;
-//         }
-//     });
-// }
-
-// function editPersonInLocalStorage(previousPersonValues, currentPersonValues) {
-//     let persons = JSON.parse(localStorage.getItem("listPersons"));
-//     for (let p of persons) {
-//         if (
-//             p.firstName === previousPersonValues.firstName &&
-//             p.lastName === previousPersonValues.lastName
-//         ) {
-//             p.firstName = currentPersonValues.firstName;
-//             p.lastName = currentPersonValues.lastName;
-//         }
-//     }
-//     localStorage.setItem("listPersons", JSON.stringify(persons));
-// }
-
-// function isExistsInLocalStorage({ firstName, lastName }) {
-//     let persons = JSON.parse(localStorage.getItem("listPersons"));
-//     if (!persons) {
-//         return false;
-//     }
-//     for (let p of persons) {
-//         if (p.firstName === firstName && p.lastName === lastName) return true;
-//     }
-//     return false;
 // }
