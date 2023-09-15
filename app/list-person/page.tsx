@@ -1,19 +1,21 @@
 "use client";
 
-import { ChangeEvent, FormEvent, MouseEvent, useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
 import { GoPersonAdd } from "react-icons/go";
 import { BsTrash3Fill } from "react-icons/bs";
-import { MdEdit, MdOutlineDone } from "react-icons/md";
+import { MdOutlineDone } from "react-icons/md";
+import { BsFilter } from "react-icons/bs";
+import { BsSortAlphaDown } from "react-icons/bs";
 import { nanoid } from "nanoid";
 import { useRouter } from "next/navigation";
 import { useSearchParams, usePathname } from "next/navigation";
+import { IPerson } from "./_types";
+import { PersonData } from "./_components";
+import { useLocalStorage } from "@/hooks";
 
 type IOperation = "add" | "edit" | "delete";
-interface IPerson {
-  id: string;
-  firstName: string;
-  lastName: string;
-}
+type IFilterType = "default" | "alphabetic";
+const LOCAL_STORAGE_KEY = "listPersons";
 
 export default function ListPerson() {
   const [firstName, setFirstName] = useState({ value: "", styles: "" });
@@ -22,43 +24,31 @@ export default function ListPerson() {
   const [checkingIds, setCheckingIds] = useState<string[]>([]);
   const [persons, setPersons] = useState<IPerson[]>([]);
   const [filteredPersons, setFilteredPersons] = useState<IPerson[]>([]);
+  const [filterType, setFilterType] = useState<IFilterType>("default");
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const params = new URLSearchParams(searchParams);
   const [search, setSearch] = useState(params.get("search") ?? "");
-
-  const getPersonsListFromLS = (): Array<IPerson> => {
-    const personsJSON = localStorage.getItem("listPersons");
-    return personsJSON ? JSON.parse(personsJSON) : [];
-  };
+  const memoizedPersons = useMemo(() => persons, [persons]);
+  const { getFromLS, placeToLS } = useLocalStorage();
 
   useEffect(() => {
-    setPersons(getPersonsListFromLS());
+    const ps = getFromLS(LOCAL_STORAGE_KEY);
+    setPersons(ps);
   }, []);
 
-  const deleteOneFromLS = (id: string) => {
-    const ps = getPersonsListFromLS();
-    ps.splice(
-      ps.findIndex((p) => p.id === id),
-      1
-    );
-    localStorage.setItem("listPersons", JSON.stringify(ps));
-  };
-
-  const deleteManyFromLS = (ids: string[]) => {
-    const ps = getPersonsListFromLS();
-    const newPersons = ps.filter((p) => !ids.includes(p.id));
-    localStorage.setItem("listPersons", JSON.stringify(newPersons));
-  };
+  useEffect(() => {
+    placeToLS(LOCAL_STORAGE_KEY, memoizedPersons);
+    filterList();
+  }, [memoizedPersons]);
 
   const isSimilar = (obj: { firstName: string; lastName: string }) => {
-    const ps = getPersonsListFromLS();
-    if (!ps) {
+    if (!persons) {
       return false;
     }
 
-    for (let p of ps) {
+    for (let p of persons) {
       if (p.firstName === obj.firstName && p.lastName === obj.lastName)
         return true;
     }
@@ -131,10 +121,10 @@ export default function ListPerson() {
       1
     );
     setPersons(copyPerson);
-    deleteOneFromLS(id);
     setCheckingIds([]);
     setFirstName({ value: "", styles: "" });
     setLastName({ value: "", styles: "" });
+    setOperation("add");
   };
 
   const editPerson = (person: IPerson) => {
@@ -142,13 +132,6 @@ export default function ListPerson() {
     setOperation("edit");
     setFirstName({ value: person.firstName, styles: "" });
     setLastName({ value: person.lastName, styles: "" });
-  };
-
-  const addToLocalStorage = (person: IPerson) => {
-    const ps = getPersonsListFromLS();
-
-    ps.push(person);
-    localStorage.setItem("listPersons", JSON.stringify(ps));
   };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -166,7 +149,6 @@ export default function ListPerson() {
           setPersons([...persons, newPerson]);
           setFirstName({ styles: "", value: "" });
           setLastName({ styles: "", value: "" });
-          addToLocalStorage(newPerson);
         }
       }
     } else if (operation === "edit") {
@@ -180,8 +162,6 @@ export default function ListPerson() {
         firstName: firstName.value,
         lastName: lastName.value,
       };
-      deleteOneFromLS(checkingIds[0]);
-      addToLocalStorage(newPerson);
       setPersons([...copy, newPerson]);
       setCheckingIds([]);
       setOperation("add");
@@ -191,9 +171,9 @@ export default function ListPerson() {
       const copy = [...persons];
       const newPersons = copy.filter((p) => !checkingIds.includes(p.id));
 
-      deleteManyFromLS([...checkingIds]);
       setPersons(newPersons);
       setOperation("add");
+      setCheckingIds([]);
     }
   };
 
@@ -213,23 +193,69 @@ export default function ListPerson() {
     setLastName({ styles: "", value: "" });
   };
 
-  const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
-    setSearch(e.target.value);
+  const filterList = (params?: ChangeEvent<HTMLInputElement>) => {
+    let finalFilter: IPerson[];
+    if (typeof params === "undefined") {
+      const filteredFromAlphabetic = filterBaseAlphabetic(
+        getFromLS(LOCAL_STORAGE_KEY)
+      );
+      const filteredFromSearch = searchList(filteredFromAlphabetic, search);
+      finalFilter = filteredFromSearch;
+    } else {
+      const filteredFromSearch = searchList(
+        getFromLS(LOCAL_STORAGE_KEY),
+        params.target.value
+      );
+      const filteredFromAlphabetic = filterBaseAlphabetic(filteredFromSearch);
+      finalFilter = filteredFromAlphabetic;
+    }
+    setFilteredPersons(finalFilter);
   };
 
-  const submitSearch = (e: MouseEvent<HTMLButtonElement>) => {
-    const filtered = persons.filter(
-      (p) => search.includes(p.firstName) || search.includes(p.lastName)
-    );
-    if (search.length === 0) {
-      setFilteredPersons(persons);
-    } else if (filtered.length === 0) {
-      setFilteredPersons([]);
-    } else {
-      setFilteredPersons(filtered);
-    }
-    params.set("search", search);
+  const searchList = (ps: IPerson[], searchValue: string | undefined) => {
+    setSearch(searchValue ?? "");
+    params.set("search", searchValue ?? "");
     router.push(pathname + "?" + params.toString());
+
+    const filtered = ps.filter(
+      (p) =>
+        p.firstName.toLowerCase().includes(searchValue ?? search) ||
+        p.lastName.toLowerCase().includes(searchValue ?? search)
+    );
+
+    if (searchValue?.length === 0 || search.length === 0) {
+      return ps;
+    } else if (filtered.length === 0) {
+      return [];
+    } else {
+      return filtered;
+    }
+  };
+
+  const filterBaseAlphabetic = (ps: IPerson[]) => {
+    let filtered: IPerson[] = [];
+    if (filterType === "alphabetic") {
+      filtered = ps;
+    } else if (filterType === "default") {
+      const copy = [...ps];
+      copy.sort((a, b) => {
+        if (a.firstName.toLowerCase() > b.firstName.toLowerCase()) return 1;
+        if (a.firstName.toLowerCase() <= b.firstName.toLowerCase()) return -1;
+        return 0;
+      });
+      filtered = copy;
+    }
+    params.set("filter", filterType);
+    router.push(pathname + "?" + params.toString());
+    return filtered;
+  };
+
+  const handleFilterType = () => {
+    if (filterType === "alphabetic") {
+      setFilterType("default");
+    } else {
+      setFilterType("alphabetic");
+    }
   };
 
   return (
@@ -294,11 +320,20 @@ export default function ListPerson() {
         <div className="flex gap-2">
           <button
             className="bg-zinc-700 py-1 px-2 sm:py-1.5 md:py-2 sm:px-3 md:px-4 rounded-sm text-lime-50 hover:bg-zinc-900 transition-all duration-300"
-            id="filterButton"
+            onClick={() => filterList()}
           >
-            {/* <FiSearch /> */}
             filter
           </button>
+          <p
+            className="bg-zinc-700 py-1 px-2 sm:py-1.5 md:py-2 sm:px-3 md:px-4 rounded-sm text-lime-50 hover:bg-zinc-900 transition-all duration-300"
+            onClick={() => handleFilterType()}
+          >
+            {filterType === "default" ? (
+              <BsFilter className="text-2xl" />
+            ) : filterType === "alphabetic" ? (
+              <BsSortAlphaDown className="text-2xl" />
+            ) : null}
+          </p>
         </div>
         <div className="flex justify-center m-1 text-white">
           <input
@@ -308,15 +343,8 @@ export default function ListPerson() {
             className="transition-all duration-200 ease-in bg-transparent rounded-sm p-1 sm:p-1.5 md:p-2 mx-1 outline-none focus:outline-none focus:border-yellow-100 placeholder:text-white placeholder:text-opacity-50 placeholder:text-xs md:placeholder:text-sm border border-white border-opacity-20"
             placeholder="Search name here..."
             value={search}
-            onChange={(e) => handleSearch(e)}
+            onChange={(e) => filterList(e)}
           />
-          <button
-            type="button"
-            onClick={(e) => submitSearch(e)}
-            className="bg-zinc-700 py-1 px-2 sm:py-1.5 md:py-2 sm:px-3 md:px-4 rounded-sm text-lime-50 hover:bg-zinc-900 transition-all duration-300"
-          >
-            search
-          </button>
         </div>
       </div>
       <table
@@ -358,108 +386,3 @@ export default function ListPerson() {
     </div>
   );
 }
-
-interface IPersonDataProps {
-  person: IPerson;
-  checkingIds: string[];
-  handleChecking: (id: string) => void;
-  deletePerson: (id: string) => void;
-  editPerson: (person: IPerson) => void;
-}
-
-const PersonData = ({
-  person,
-  checkingIds,
-  handleChecking,
-  deletePerson,
-  editPerson,
-}: IPersonDataProps) => {
-  return (
-    <tr
-      className={`${
-        checkingIds.includes(person.id) ? "bg-gray-700" : ""
-      } animate-fade_in_from_bottom flex justify-between cursor-pointer text-center text-xs sm:text-base p-1 sm:p-1.5 border-b border-gray-50 border-opacity-10 transition-all duration-300 hover:bg-gray-600`}
-    >
-      <td className="p-1 sm:p-1.5">
-        <input
-          type="checkbox"
-          checked={checkingIds.includes(person.id)}
-          onChange={() => handleChecking(person.id)}
-        />
-      </td>
-      <td className="p-1 sm:p-1.5">{person.firstName}</td>
-      <td className="p-1 sm:p-1.5">{person.lastName}</td>
-      <td className="p-1 sm:p-1.5 flex items-center gap-5 justify-center min-w-[15%]">
-        <button
-          type="button"
-          className="text-red-700 hover:text-red-900 text-xs sm:text-sm"
-          onClick={() => deletePerson(person.id)}
-        >
-          <BsTrash3Fill size="20px" />
-        </button>
-        {"    "}
-        <button
-          type="button"
-          className="text-yellow-400 hover:text-yellow-700 text-xs sm:text-sm"
-          onClick={() => editPerson(person)}
-        >
-          <MdEdit size="20px" />
-        </button>
-      </td>
-    </tr>
-  );
-};
-// // triggers with every change in search input
-// searchInput.addEventListener("input", searchPersons);
-// filterButton.addEventListener("click", filterPersons);
-// // when DOM and styles loaded,then persons saved in local Storage should be fetched
-
-// function filterPersons(event) {
-//     let table = document.querySelector("#showInfoTable > tbody");
-//     let persons = JSON.parse(localStorage.getItem("listPersons"));
-
-//     // if filter button is alphabetic shape,then it should be displayed base on alphabetic order
-//     if (filterButton.children[0].classList.contains("fa-list")) {
-//         filterButton.innerHTML = `<i class="fa-solid fa-arrow-down-a-z"></i>`;
-//         // sort person lists base on first name
-//         let sortedTable = Array.from(table.children).sort((a, b) => {
-//             if (
-//                 a.children[1].innerHTML.toLowerCase() >
-//                 b.children[1].innerHTML.toLowerCase()
-//             )
-//                 return 1;
-//             if (
-//                 a.children[1].innerHTML.toLowerCase() <=
-//                 b.children[1].innerHTML.toLowerCase()
-//             )
-//                 return -1;
-//             return 0;
-//         });
-//         // create person lists base on sorted list
-//         table.innerHTML = "";
-//         for (let p of sortedTable) {
-//             let person = personSpecification({
-//                 firstName: p.children[1].innerHTML,
-//                 lastName: p.children[2].innerHTML,
-//             });
-//             table.insertAdjacentHTML("beforeend", person);
-//         }
-//         // if search input has value,then we should show items base on that value
-//         if (searchInput.value) searchPersons({ target: searchInput });
-//         console.log(searchInput.value !== "");
-//     } else {
-//         filterButton.innerHTML = `<i class="fa-solid fa-list"></i>`;
-//         // create person lists base on default order
-//         table.innerHTML = "";
-//         for (let p of persons) {
-//             let person = personSpecification({
-//                 firstName: p.firstName,
-//                 lastName: p.lastName,
-//             });
-//             table.insertAdjacentHTML("beforeend", person);
-//         }
-//         // if search input has value,then we should show items base on that value
-//         if (searchInput.value) searchPersons({ target: searchInput });
-//         console.log(searchInput.value !== "");
-//     }
-// }
