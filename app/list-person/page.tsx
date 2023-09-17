@@ -234,9 +234,9 @@ export default function ListPerson() {
 
   const filterBaseAlphabetic = (ps: IPerson[]) => {
     let filtered: IPerson[] = [];
-    if (filterType === "alphabetic") {
+    if (filterType === "default") {
       filtered = ps;
-    } else if (filterType === "default") {
+    } else if (filterType === "alphabetic") {
       const copy = [...ps];
       copy.sort((a, b) => {
         if (a.firstName.toLowerCase() > b.firstName.toLowerCase()) return 1;
@@ -259,13 +259,13 @@ export default function ListPerson() {
   };
 
   return (
-    <div className="container grid">
+    <div className="container grid mx-auto">
       <h1 className="text-center text-base sm:text-xl md:text-3xl m-3 p-1 text-blue-200">
         List persons
       </h1>
       <form
         onSubmit={handleSubmit}
-        className="flex items-center justify-center gap-5 my-5"
+        className="flex flex-col md:flex-row items-center justify-center gap-5 my-5"
       >
         <div className="flex flex-col sm:flex-row">
           <div className="flex justify-center text-white my-1 sm:my-0 sm:mx-2">
@@ -291,7 +291,7 @@ export default function ListPerson() {
             />
           </div>
         </div>
-        <div>
+        <div className="w-full md:w-auto">
           <button
             type="submit"
             id="addButton"
@@ -304,7 +304,7 @@ export default function ListPerson() {
                 : operation === "delete"
                 ? "bg-red-500 hover:bg-red-900 focus:outline-red-900"
                 : ""
-            } bg-green-500 py-1 px-2 sm:py-1.5 sm:px-3 md:px-3.5 rounded-sm text-lime-50 transition-all duration-300 focus:border-none outline-none`}
+            } py-1 px-2 w-1/4 md:w-auto flex justify-center gap-2 mx-auto sm:py-1.5 sm:px-3 md:px-3.5 rounded-sm text-lime-50 transition-all duration-300 focus:border-none outline-none`}
           >
             {operation === "add" ? (
               <GoPersonAdd className="text-2xl" />
@@ -325,7 +325,7 @@ export default function ListPerson() {
             filter
           </button>
           <p
-            className="bg-zinc-700 py-1 px-2 sm:py-1.5 md:py-2 sm:px-3 md:px-4 rounded-sm text-lime-50 hover:bg-zinc-900 transition-all duration-300"
+            className="cursor-pointer bg-zinc-700 py-1 px-2 sm:py-1.5 md:py-2 sm:px-3 md:px-4 rounded-sm text-lime-50 hover:bg-zinc-900 transition-all duration-300"
             onClick={() => handleFilterType()}
           >
             {filterType === "default" ? (
@@ -349,7 +349,7 @@ export default function ListPerson() {
       </div>
       <table
         id="showInfoTable"
-        className="text-white table-auto grid w-full sm:w-3/4 max-h-80 p-1 sm:p-3 backdrop-blur-sm overflow-y-auto"
+        className="text-white table-auto grid w-full sm:w-3/4 max-h-80 p-1 sm:p-3 backdrop-blur-sm overflow-y-auto mx-auto"
       >
         <thead>
           <tr className="flex justify-between p-1 sm:p-1.5 border-b border-gray-50 border-opacity-10 text-xs sm:text-base">
