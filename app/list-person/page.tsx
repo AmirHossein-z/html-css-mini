@@ -137,36 +137,42 @@ export default function ListPerson() {
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (operation === "add") {
-      if (isValidName(firstName.value) && isValidName(lastName.value)) {
-        if (
-          !isSimilar({ firstName: firstName.value, lastName: lastName.value })
-        ) {
-          const newPerson: IPerson = {
-            id: nanoid(),
-            firstName: firstName.value,
-            lastName: lastName.value,
-          };
-          setPersons([...persons, newPerson]);
-          setFirstName({ styles: "", value: "" });
-          setLastName({ styles: "", value: "" });
-        }
+      if (
+        isValidName(firstName.value) &&
+        isValidName(lastName.value) &&
+        !isSimilar({ firstName: firstName.value, lastName: lastName.value })
+      ) {
+        const newPerson: IPerson = {
+          id: nanoid(),
+          firstName: firstName.value,
+          lastName: lastName.value,
+        };
+        setPersons([...persons, newPerson]);
+        setFirstName({ styles: "", value: "" });
+        setLastName({ styles: "", value: "" });
       }
     } else if (operation === "edit") {
-      const copy = [...persons];
-      copy.splice(
-        copy.findIndex((person) => person.id === checkingIds[0]),
-        1
-      );
-      const newPerson = {
-        id: checkingIds[0],
-        firstName: firstName.value,
-        lastName: lastName.value,
-      };
-      setPersons([...copy, newPerson]);
-      setCheckingIds([]);
-      setOperation("add");
-      setFirstName({ styles: "", value: "" });
-      setLastName({ styles: "", value: "" });
+      if (
+        isValidName(firstName.value) &&
+        isValidName(lastName.value) &&
+        !isSimilar({ firstName: firstName.value, lastName: lastName.value })
+      ) {
+        const copy = [...persons];
+        copy.splice(
+          copy.findIndex((person) => person.id === checkingIds[0]),
+          1
+        );
+        const newPerson = {
+          id: checkingIds[0],
+          firstName: firstName.value,
+          lastName: lastName.value,
+        };
+        setPersons([...copy, newPerson]);
+        setCheckingIds([]);
+        setOperation("add");
+        setFirstName({ styles: "", value: "" });
+        setLastName({ styles: "", value: "" });
+      }
     } else if (operation === "delete" && checkingIds.length > 0) {
       const copy = [...persons];
       const newPersons = copy.filter((p) => !checkingIds.includes(p.id));
