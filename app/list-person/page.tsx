@@ -115,16 +115,18 @@ export default function ListPerson() {
   };
 
   const deletePerson = (id: string) => {
-    const copyPerson = [...persons];
-    copyPerson.splice(
-      copyPerson.findIndex((p) => p.id === id),
-      1
-    );
-    setPersons(copyPerson);
-    setCheckingIds([]);
-    setFirstName({ value: "", styles: "" });
-    setLastName({ value: "", styles: "" });
-    setOperation("add");
+    if (confirm("Are you sure want to delete?")) {
+      const copyPerson = [...persons];
+      copyPerson.splice(
+        copyPerson.findIndex((p) => p.id === id),
+        1
+      );
+      setPersons(copyPerson);
+      setCheckingIds([]);
+      setFirstName({ value: "", styles: "" });
+      setLastName({ value: "", styles: "" });
+      setOperation("add");
+    }
   };
 
   const editPerson = (person: IPerson) => {
@@ -173,7 +175,11 @@ export default function ListPerson() {
         setFirstName({ styles: "", value: "" });
         setLastName({ styles: "", value: "" });
       }
-    } else if (operation === "delete" && checkingIds.length > 0) {
+    } else if (
+      operation === "delete" &&
+      checkingIds.length > 0 &&
+      confirm("Are you sure want to delete?")
+    ) {
       const copy = [...persons];
       const newPersons = copy.filter((p) => !checkingIds.includes(p.id));
 
