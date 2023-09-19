@@ -1,6 +1,14 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
+import {
+  ChangeEvent,
+  FormEvent,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
 import { GoPersonAdd } from "react-icons/go";
 import { BsTrash3Fill } from "react-icons/bs";
 import { MdOutlineDone } from "react-icons/md";
@@ -16,26 +24,80 @@ import { useLocalStorage } from "@/hooks";
 type IOperation = "add" | "edit" | "delete";
 type IFilterType = "default" | "alphabetic";
 const LOCAL_STORAGE_KEY = "listPersons";
+interface IInput {
+  firstName: { values: string; styles: string };
+  lastName: { values: string; styles: string };
+}
+
+enum ActionKind {
+  ADD_PERSON = "ADD_PERSON",
+  CHANGE_OPERATION = "CHANGE_OPERATION",
+}
+
+interface TAction {
+  type: ActionKind;
+  payload?: Partial<IReducerState>;
+}
+
+interface IReducerState {
+  operation: IOperation;
+  checkingIds: string[];
+  persons: IPerson[];
+}
+
+const personReducer = (
+  state: IReducerState,
+  action: TAction
+): IReducerState => {
+  const { type, payload } = action;
+  switch (type) {
+    case ActionKind.CHANGE_OPERATION: {
+      return {
+        ...state,
+        checkingIds: payload?.checkingIds ?? state.checkingIds,
+        operation: payload?.operation ?? state.operation,
+        persons: payload?.persons ?? state.persons,
+      };
+    }
+    case ActionKind.ADD_PERSON: {
+      return {
+        ...state,
+        persons: payload?.persons ?? state.persons,
+      };
+    }
+    default:
+      throw Error("Unknown action: " + action.type);
+  }
+};
 
 export default function ListPerson() {
-  const [firstName, setFirstName] = useState({ value: "", styles: "" });
-  const [lastName, setLastName] = useState({ value: "", styles: "" });
-  const [operation, setOperation] = useState<IOperation>("add");
-  const [checkingIds, setCheckingIds] = useState<string[]>([]);
-  const [persons, setPersons] = useState<IPerson[]>([]);
-  const [filteredPersons, setFilteredPersons] = useState<IPerson[]>([]);
-  const [filterType, setFilterType] = useState<IFilterType>("default");
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const params = new URLSearchParams(searchParams);
-  const [search, setSearch] = useState(params.get("search") ?? "");
-  const memoizedPersons = useMemo(() => persons, [persons]);
+  const [names, setNames] = useState<IInput>({
+    firstName: { styles: "", values: "" },
+    lastName: { styles: "", values: "" },
+  });
+  const initialPersonState: IReducerState = {
+    operation: "add",
+    checkingIds: [],
+    persons: [],
+  };
+  const [personState, dispatch] = useReducer(personReducer, initialPersonState);
+  const [filteredPersons, setFilteredPersons] = useState<IPerson[]>([]); //
+  const [filterType, setFilterType] = useState<IFilterType>("default"); //
+  const router = useRouter(); //
+  const pathname = usePathname(); //
+  const searchParams = useSearchParams(); //
+  const params = new URLSearchParams(searchParams); //
+  const search = useRef(params.get("search") ?? ""); //
+  const memoizedPersons = useMemo(
+    () => personState.persons,
+    [personState.persons]
+  );
   const { getFromLS, placeToLS } = useLocalStorage();
 
   useEffect(() => {
     const ps = getFromLS(LOCAL_STORAGE_KEY);
-    setPersons(ps);
+
+    dispatch({ type: ActionKind.ADD_PERSON, payload: { persons: ps } });
   }, []);
 
   useEffect(() => {
@@ -44,11 +106,11 @@ export default function ListPerson() {
   }, [memoizedPersons]);
 
   const isSimilar = (obj: { firstName: string; lastName: string }) => {
-    if (!persons) {
+    if (!personState.persons) {
       return false;
     }
 
-    for (let p of persons) {
+    for (let p of personState.persons) {
       if (p.firstName === obj.firstName && p.lastName === obj.lastName)
         return true;
     }
@@ -65,144 +127,269 @@ export default function ListPerson() {
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.name === "firstName") {
       if (isValidName(e.target.value)) {
-        setFirstName({
-          value: e.target.value,
-          styles: "focus:border-green-500",
+        setNames((prevNames) => {
+          return {
+            ...prevNames,
+            firstName: {
+              values: e.target.value,
+              styles: "focus:border-green-500",
+            },
+          };
         });
       } else {
-        setFirstName({
-          ...firstName,
-          value: e.target.value,
-          styles: "focus:border-red-600",
+        setNames((prevNames) => {
+          return {
+            ...prevNames,
+            firstName: {
+              values: e.target.value,
+              styles: "focus:border-green-500",
+            },
+          };
         });
       }
     }
 
     if (e.target.name === "lastName") {
       if (isValidName(e.target.value)) {
-        setLastName({
-          value: e.target.value,
-          styles: "focus:border-green-500",
+        setNames((prevNames) => {
+          return {
+            ...prevNames,
+            lastName: {
+              values: e.target.value,
+              styles: "focus:border-green-500",
+            },
+          };
         });
       } else {
-        setLastName({
-          value: e.target.value,
-          styles: "focus:border-red-600",
+        setNames((prevNames) => {
+          return {
+            ...prevNames,
+            lastName: {
+              values: e.target.value,
+              styles: "focus:border-green-500",
+            },
+          };
         });
       }
     }
   };
 
   const isAllChecked = () => {
-    const personIds = persons.map((p) => p.id);
+    const personIds = personState.persons.map((p) => p.id);
     return (
-      checkingIds.length > 0 &&
-      personIds.every((personId) => checkingIds.includes(personId))
+      personState.checkingIds.length > 0 &&
+      personIds.every((personId) => personState.checkingIds.includes(personId))
     );
   };
 
   const checkAllPerson = () => {
-    if (isAllChecked()) {
-      setCheckingIds([]);
-      setOperation("add");
+    if (isAllChecked() || !(personState.persons.length > 0)) {
+      dispatch({
+        type: ActionKind.CHANGE_OPERATION,
+        payload: { checkingIds: [], operation: "add" },
+      });
     } else {
-      const personIds = persons.map((p) => p.id);
-      setCheckingIds(personIds);
-      setOperation("delete");
+      const personIds = personState.persons.map((p) => p.id);
+      dispatch({
+        type: ActionKind.CHANGE_OPERATION,
+        payload: { checkingIds: personIds, operation: "delete" },
+      });
     }
-    setFirstName({ value: "", styles: "" });
-    setLastName({ value: "", styles: "" });
+
+    setNames((prevNames) => {
+      return {
+        ...prevNames,
+        lastName: {
+          values: "",
+          styles: "",
+        },
+        firstName: {
+          values: "",
+          styles: "",
+        },
+      };
+    });
   };
 
   const deletePerson = (id: string) => {
     if (confirm("Are you sure want to delete?")) {
-      const copyPerson = [...persons];
+      const copyPerson = [...personState.persons];
       copyPerson.splice(
         copyPerson.findIndex((p) => p.id === id),
         1
       );
-      setPersons(copyPerson);
-      setCheckingIds([]);
-      setFirstName({ value: "", styles: "" });
-      setLastName({ value: "", styles: "" });
-      setOperation("add");
+      dispatch;
+      dispatch({
+        type: ActionKind.CHANGE_OPERATION,
+        payload: { checkingIds: [], operation: "add", persons: copyPerson },
+      });
+      setNames((prevNames) => {
+        return {
+          ...prevNames,
+          lastName: {
+            values: "",
+            styles: "",
+          },
+          firstName: {
+            values: "",
+            styles: "",
+          },
+        };
+      });
     }
   };
 
   const editPerson = (person: IPerson) => {
-    setCheckingIds([person.id]);
-    setOperation("edit");
-    setFirstName({ value: person.firstName, styles: "" });
-    setLastName({ value: person.lastName, styles: "" });
+    dispatch({
+      type: ActionKind.CHANGE_OPERATION,
+      payload: { checkingIds: [person.id], operation: "edit" },
+    });
+    setNames((prevNames) => {
+      return {
+        ...prevNames,
+        lastName: {
+          values: person.lastName,
+          styles: "",
+        },
+        firstName: {
+          values: person.firstName,
+          styles: "",
+        },
+      };
+    });
   };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (operation === "add") {
+    if (personState.operation === "add") {
       if (
-        isValidName(firstName.value) &&
-        isValidName(lastName.value) &&
-        !isSimilar({ firstName: firstName.value, lastName: lastName.value })
+        isValidName(names.firstName.values) &&
+        isValidName(names.lastName.values) &&
+        !isSimilar({
+          firstName: names.firstName.values,
+          lastName: names.lastName.values,
+        })
       ) {
         const newPerson: IPerson = {
           id: nanoid(),
-          firstName: firstName.value,
-          lastName: lastName.value,
+          firstName: names.firstName.values,
+          lastName: names.lastName.values,
         };
-        setPersons([...persons, newPerson]);
-        setFirstName({ styles: "", value: "" });
-        setLastName({ styles: "", value: "" });
+        dispatch({
+          type: ActionKind.ADD_PERSON,
+          payload: { persons: [...personState.persons, newPerson] },
+        });
+
+        setNames((prevNames) => {
+          return {
+            ...prevNames,
+            lastName: {
+              values: "",
+              styles: "",
+            },
+            firstName: {
+              values: "",
+              styles: "",
+            },
+          };
+        });
       }
-    } else if (operation === "edit") {
+    } else if (personState.operation === "edit") {
       if (
-        isValidName(firstName.value) &&
-        isValidName(lastName.value) &&
-        !isSimilar({ firstName: firstName.value, lastName: lastName.value })
+        isValidName(names.firstName.values) &&
+        isValidName(names.lastName.values) &&
+        !(names.firstName.values === "" || names.lastName.values == "")
+        // !isSimilar({
+        //   firstName: names.firstName.values,
+        //   lastName: names.lastName.values,
+        // })
       ) {
-        const copy = [...persons];
+        const copy = [...personState.persons];
         copy.splice(
-          copy.findIndex((person) => person.id === checkingIds[0]),
+          copy.findIndex((person) => person.id === personState.checkingIds[0]),
           1
         );
         const newPerson = {
-          id: checkingIds[0],
-          firstName: firstName.value,
-          lastName: lastName.value,
+          id: personState.checkingIds[0],
+          firstName: names.firstName.values,
+          lastName: names.lastName.values,
         };
-        setPersons([...copy, newPerson]);
-        setCheckingIds([]);
-        setOperation("add");
-        setFirstName({ styles: "", value: "" });
-        setLastName({ styles: "", value: "" });
+        dispatch({
+          type: ActionKind.CHANGE_OPERATION,
+          payload: {
+            checkingIds: [],
+            operation: "add",
+            persons: [...copy, newPerson],
+          },
+        });
+
+        setNames((prevNames) => {
+          return {
+            ...prevNames,
+            lastName: {
+              values: "",
+              styles: "",
+            },
+            firstName: {
+              values: "",
+              styles: "",
+            },
+          };
+        });
       }
     } else if (
-      operation === "delete" &&
-      checkingIds.length > 0 &&
+      personState.operation === "delete" &&
+      personState.checkingIds.length > 0 &&
       confirm("Are you sure want to delete?")
     ) {
-      const copy = [...persons];
-      const newPersons = copy.filter((p) => !checkingIds.includes(p.id));
+      const copy = [...personState.persons];
+      const newPersons = copy.filter(
+        (p) => !personState.checkingIds.includes(p.id)
+      );
 
-      setPersons(newPersons);
-      setOperation("add");
-      setCheckingIds([]);
+      dispatch({
+        type: ActionKind.CHANGE_OPERATION,
+        payload: { checkingIds: [], operation: "add", persons: newPersons },
+      });
     }
   };
 
   const handleChecking = (id: string) => {
-    if (!checkingIds.includes(id)) {
-      setCheckingIds([...checkingIds, id]);
-      setOperation("delete");
+    if (!personState.checkingIds.includes(id)) {
+      dispatch({
+        type: ActionKind.CHANGE_OPERATION,
+        payload: {
+          checkingIds: [...personState.checkingIds, id],
+          operation: "delete",
+        },
+      });
     } else {
-      if (checkingIds.length === 1) {
-        setOperation("add");
+      if (personState.checkingIds.length === 1) {
+        dispatch({
+          type: ActionKind.CHANGE_OPERATION,
+          payload: { operation: "add" },
+        });
       }
-      const copy = [...checkingIds];
+      const copy = [...personState.checkingIds];
       copy.splice(copy.indexOf(id), 1);
-      setCheckingIds(copy);
+      dispatch({
+        type: ActionKind.CHANGE_OPERATION,
+        payload: { checkingIds: copy },
+      });
     }
-    setFirstName({ styles: "", value: "" });
-    setLastName({ styles: "", value: "" });
+    setNames((prevNames) => {
+      return {
+        ...prevNames,
+        lastName: {
+          values: "",
+          styles: "",
+        },
+        firstName: {
+          values: "",
+          styles: "",
+        },
+      };
+    });
   };
 
   const filterList = (params?: ChangeEvent<HTMLInputElement>) => {
@@ -211,7 +398,10 @@ export default function ListPerson() {
       const filteredFromAlphabetic = filterBaseAlphabetic(
         getFromLS(LOCAL_STORAGE_KEY)
       );
-      const filteredFromSearch = searchList(filteredFromAlphabetic, search);
+      const filteredFromSearch = searchList(
+        filteredFromAlphabetic,
+        search.current
+      );
       finalFilter = filteredFromSearch;
     } else {
       const filteredFromSearch = searchList(
@@ -225,17 +415,18 @@ export default function ListPerson() {
   };
 
   const searchList = (ps: IPerson[], searchValue: string | undefined) => {
-    setSearch(searchValue ?? "");
+    // setSearch(searchValue ?? "");
+    search.current = searchValue ?? "";
     params.set("search", searchValue ?? "");
     router.push(pathname + "?" + params.toString());
 
     const filtered = ps.filter(
       (p) =>
-        p.firstName.toLowerCase().includes(searchValue ?? search) ||
-        p.lastName.toLowerCase().includes(searchValue ?? search)
+        p.firstName.toLowerCase().includes(searchValue ?? search.current) ||
+        p.lastName.toLowerCase().includes(searchValue ?? search.current)
     );
 
-    if (searchValue?.length === 0 || search.length === 0) {
+    if (searchValue?.length === 0 || search.current.length === 0) {
       return ps;
     } else if (filtered.length === 0) {
       return [];
@@ -285,10 +476,10 @@ export default function ListPerson() {
               type="text"
               id="firstName"
               name="firstName"
-              value={firstName.value}
+              value={names.firstName.values}
               onChange={handleChange}
               placeholder="Enter first name here..."
-              className={`${firstName.styles} focus:outline-none outline-none transition-all duration-200 ease-in bg-transparent rounded-sm p-1 sm:p-1.5 border border-white border-opacity-20 placeholder:text-white placeholder:text-opacity-50 placeholder:text-xs md:placeholder:text-sm`}
+              className={`${names.firstName.styles} focus:outline-none outline-none transition-all duration-200 ease-in bg-transparent rounded-sm p-1 sm:p-1.5 border border-white border-opacity-20 placeholder:text-white placeholder:text-opacity-50 placeholder:text-xs md:placeholder:text-sm`}
             />
           </div>
           <div className="flex justify-center text-white my-1 sm:my-0">
@@ -296,10 +487,10 @@ export default function ListPerson() {
               type="text"
               id="lastName"
               name="lastName"
-              value={lastName.value}
+              value={names.lastName.values}
               onChange={handleChange}
               placeholder="Enter last name here..."
-              className={`${lastName.styles} focus:outline-none outline-none transition-all duration-200 ease-in bg-transparent rounded-sm p-1 sm:p-1.5 border border-white border-opacity-20 placeholder:text-white placeholder:text-opacity-50 placeholder:text-xs md:placeholder:text-sm`}
+              className={`${names.lastName.styles} focus:outline-none outline-none transition-all duration-200 ease-in bg-transparent rounded-sm p-1 sm:p-1.5 border border-white border-opacity-20 placeholder:text-white placeholder:text-opacity-50 placeholder:text-xs md:placeholder:text-sm`}
             />
           </div>
         </div>
@@ -309,20 +500,20 @@ export default function ListPerson() {
             id="addButton"
             name="addButton"
             className={`cursor-pointer ${
-              operation === "add"
+              personState.operation === "add"
                 ? "bg-green-500 hover:bg-green-900 focus:outline-green-500"
-                : operation === "edit"
+                : personState.operation === "edit"
                 ? "bg-yellow-500 hover:bg-yellow-900 focus:outline-yellow-900"
-                : operation === "delete"
+                : personState.operation === "delete"
                 ? "bg-red-500 hover:bg-red-900 focus:outline-red-900"
                 : ""
             } py-1 px-2 w-1/4 md:w-auto flex justify-center gap-2 mx-auto sm:py-1.5 sm:px-3 md:px-3.5 rounded-sm text-lime-50 transition-all duration-300 focus:border-none outline-none`}
           >
-            {operation === "add" ? (
+            {personState.operation === "add" ? (
               <GoPersonAdd className="text-2xl" />
-            ) : operation === "edit" ? (
+            ) : personState.operation === "edit" ? (
               <MdOutlineDone className="text-2xl" />
-            ) : operation === "delete" ? (
+            ) : personState.operation === "delete" ? (
               <BsTrash3Fill className="text-2xl" />
             ) : null}
           </button>
@@ -354,7 +545,7 @@ export default function ListPerson() {
             name="searchInput"
             className="transition-all duration-200 ease-in bg-transparent rounded-sm p-1 sm:p-1.5 md:p-2 mx-1 outline-none focus:outline-none focus:border-yellow-100 placeholder:text-white placeholder:text-opacity-50 placeholder:text-xs md:placeholder:text-sm border border-white border-opacity-20"
             placeholder="Search name here..."
-            value={search}
+            value={search.current}
             onChange={(e) => filterList(e)}
           />
         </div>
@@ -385,7 +576,7 @@ export default function ListPerson() {
             ? filteredPersons.map((person) => (
                 <PersonData
                   key={person.id}
-                  checkingIds={checkingIds}
+                  checkingIds={personState.checkingIds}
                   person={person}
                   handleChecking={handleChecking}
                   deletePerson={deletePerson}
