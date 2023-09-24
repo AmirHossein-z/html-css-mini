@@ -52,6 +52,12 @@ see list of persons with add,edit,delete,search,filter feature saved in localSto
 
 Open [http://localhost:3000/list-person](http://localhost:3000/list-person) with your browser to see
 
+## select courses university
+
+see a simulator for selecting courses on university
+
+Open [http://localhost:3000/select-courses-uni](http://localhost:3000/select-courses-uni) with your browser to see
+
 ## Acknowledgements
 
 - [Next.js](https://nextjs.org/)
