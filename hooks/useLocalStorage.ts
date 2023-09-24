@@ -1,14 +1,15 @@
 import { TLocalStorageKey } from "@/types";
+import { useEffect } from "react";
 
 const getFromLS = (key: TLocalStorageKey) => {
-  let personsJSON;
+  let itemsJSON;
   try {
-    personsJSON = localStorage.getItem(key);
-    personsJSON = personsJSON ? JSON.parse(personsJSON) : [];
+    itemsJSON = localStorage.getItem(key);
+    itemsJSON = itemsJSON ? JSON.parse(itemsJSON) : [];
   } catch (err) {
     console.log(`data in localStorage is currepted! ${err}`);
   }
-  return personsJSON ?? [];
+  return itemsJSON ?? [];
 };
 
 const placeToLS = (key: TLocalStorageKey, ps: any[]) => {
