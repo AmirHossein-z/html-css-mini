@@ -56,6 +56,8 @@ Open [http://localhost:3000/list-person](http://localhost:3000/list-person) with
 
 see a simulator for selecting courses on university
 
+#### NOTE: this page isn't responsive!
+
 Open [http://localhost:3000/select-courses-uni](http://localhost:3000/select-courses-uni) with your browser to see
 
 ## Acknowledgements
