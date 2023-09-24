@@ -30,19 +30,21 @@ const AddModal = forwardRef<any, IAddModalProps>(function AddModal(
         onSubmit={handleSubmit}
       >
         {!canAddClassTime() && (
-          <p className="text-red-600">شما نمی‌توانید کلاس جدیدی اضافه کنید</p>
+          <p className="text-red-600 font-semibold bg-red-100 rounded p-2">
+            شما نمی‌توانید کلاس جدیدی اضافه کنید
+          </p>
         )}
-        <h3 className="font-bold text-lg">افزودن کلاس جدید</h3>
+        <h3 className="font-bold text-lg text-black">افزودن کلاس جدید</h3>
         <input
           type="text"
-          className="input input-info"
+          className="input input-primary bg-transparent text-black"
           name="content"
           placeholder="نام کلاس"
-          value={inputs.content}
+          value={...inputs.content.split(";")}
           onChange={(e) => handelChange(e)}
         />
         <select
-          className="select select-primary"
+          className="select select-primary bg-transparent text-black"
           placeholder="نوع کلاس"
           name="type"
           value={inputs.type}
@@ -70,7 +72,7 @@ const AddModal = forwardRef<any, IAddModalProps>(function AddModal(
           )}
         </select>
 
-        <button type="submit" className="btn btn-secondary">
+        <button type="submit" className="btn btn-primary">
           افزودن
         </button>
       </form>

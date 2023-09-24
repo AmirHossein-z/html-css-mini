@@ -10,8 +10,8 @@ export default function WeekDays({ label }: { label: TWeekDayNumber }) {
     "6": "پنچ‌شنبه",
   };
   return (
-    <td className="px-5 py-5 text-sm bg-white border-b border-gray-200">
-      <div className="flex items-center">
+    <td className="p-4 text-base bg-white border-b border-gray-200">
+      <div className="flex items-center justify-center">
         <p className="text-gray-900 whitespace-no-wrap font-semibold">
           {days[label]}
         </p>

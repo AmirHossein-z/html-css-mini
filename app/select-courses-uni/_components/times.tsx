@@ -29,7 +29,7 @@ export default function Times() {
         <th
           key={time.value}
           scope="col"
-          className="px-5 py-3 text-lg font-semibold text-center text-gray-800 bg-white border-b border-gray-200"
+          className="p-4 text-base font-semibold text-center text-gray-900 bg-white border border-gray-200"
         >
           {time.value}
         </th>

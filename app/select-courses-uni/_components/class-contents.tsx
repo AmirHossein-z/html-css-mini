@@ -3,7 +3,7 @@ import { useLocalStorage } from "@/hooks";
 import { useEffect, useState } from "react";
 import { ClassPlaceholder } from ".";
 import { nanoid } from "nanoid";
-import { IClassTimes, IDays, TWeekDayNumber } from "../_types";
+import { IClassTimes, TWeekDayNumber } from "../_types";
 import WeekDays from "./week-days";
 
 const days: TWeekDayNumber[] = ["1", "2", "3", "4", "5", "6"];
@@ -39,7 +39,7 @@ export default function ClassContents() {
                   id: nanoid(),
                   day: day,
                   startTime: `${8 + item}`,
-                  content: "content",
+                  content: "",
                   type: "0",
                 }));
               })

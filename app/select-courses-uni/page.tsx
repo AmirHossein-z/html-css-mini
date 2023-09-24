@@ -4,8 +4,11 @@ export default function SelectCoursesUni() {
   return (
     <>
       <div>
-        <div className="container max-w-3xl px-4 mx-auto sm:px-8">
+        <div className="container max-w-full px-4 mx-auto sm:px-8">
           <div className="py-8">
+            <p className="text-lg text-center text-white">
+              رنگ آبی برای روزهای زوج و رنگ قرمز برای روزهای فرد است
+            </p>
             <div className="px-4 py-4 -mx-4 overflow-x-auto sm:-mx-8 sm:px-8">
               <div className="inline-block min-w-full overflow-hidden rounded-lg shadow">
                 <table
@@ -24,9 +27,6 @@ export default function SelectCoursesUni() {
           </div>
         </div>
       </div>
-      <p className="text-lg text-center text-black">
-        رنگ آبی برای روزهای زوج و رنگ قرمز برای روزهای فرد است.
-      </p>
     </>
   );
 }
