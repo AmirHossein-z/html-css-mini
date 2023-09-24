@@ -7,74 +7,40 @@ import { IClassTimes, IDays, TWeekDayNumber } from "../_types";
 
 export default function ClassContents() {
   const { getFromLS, placeToLS } = useLocalStorage();
-  const initialClassTimes = [
+  const days: TWeekDayNumber[] = ["1", "2", "3", "4", "5", "6"];
+  const initialClassTimes =
     getFromLS("classTimes")?.length > 0
       ? getFromLS("classTimes")
       : [
-          ...Array.from([0, 2, 4, 6, 8, 10]).map((item) => ({
-            id: nanoid(),
-            day: "1",
-            startTime: `${8 + item}`,
-            content: "content",
-            type: "0",
-          })),
-          ...Array.from([0, 2, 4, 6, 8, 10]).map((item) => ({
-            id: nanoid(),
-            day: "2",
-            startTime: `${8 + item}`,
-            content: "content",
-            type: "0",
-          })),
-          ...Array.from([0, 2, 4, 6, 8, 10]).map((item) => ({
-            id: nanoid(),
-            day: "3",
-            startTime: `${8 + item}`,
-            content: "content",
-            type: "0",
-          })),
-          ...Array.from([0, 2, 4, 6, 8, 10]).map((item) => ({
-            id: nanoid(),
-            day: "4",
-            startTime: `${8 + item}`,
-            content: "content",
-            type: "0",
-          })),
-          ...Array.from([0, 2, 4, 6, 8, 10]).map((item) => ({
-            id: nanoid(),
-            day: "5",
-            startTime: `${8 + item}`,
-            content: "content",
-            type: "0",
-          })),
-          ...Array.from([0, 2, 4, 6, 8, 10]).map((item) => ({
-            id: nanoid(),
-            day: "6",
-            startTime: `${8 + item}`,
-            content: "content",
-            type: "0",
-          })),
-        ],
-  ]
-    .sort((a, b) => {
-      const startTimeA = parseInt(a.startTime);
-      const startTimeB = parseInt(b.startTime);
-      if (startTimeA < startTimeB) {
-        return -1;
-      } else if (startTimeA > startTimeB) {
-        return 1;
-      } else {
-        return 0;
-      }
-    })
-    .flat(1);
+          ...days
+            .map((day) => {
+              return [0, 2, 4, 5, 8, 10].map((item) => ({
+                id: nanoid(),
+                day: day,
+                startTime: `${8 + item}`,
+                content: "content",
+                type: "0",
+              }));
+            })
+            .flat(1),
+        ]
+          .sort((a, b) => {
+            const startTimeA = parseInt(a.startTime);
+            const startTimeB = parseInt(b.startTime);
+            if (startTimeA < startTimeB) {
+              return -1;
+            } else if (startTimeA > startTimeB) {
+              return 1;
+            } else {
+              return 0;
+            }
+          })
+          .flat(1);
 
   const [classTimes, setClassTimes] =
     useState<IClassTimes[]>(initialClassTimes);
-  const days: TWeekDayNumber[] = ["1", "2", "3", "4", "5", "6"];
 
-  // console.log("classTimes after sort :>> ", classTimes);
   const handleSetClassTime = (classTimes: IClassTimes[]) => {
-    // console.log("classTimes before sort :>> ", classTimes);
     classTimes
       .sort((a, b) => {
         const startTimeA = parseInt(a.startTime);
@@ -93,7 +59,7 @@ export default function ClassContents() {
 
   return (
     <tbody>
-      {Array.from(days).map((row) => (
+      {days.map((row) => (
         <tr key={row}>
           <WeekDays label={row} />
           {classTimes.map(
