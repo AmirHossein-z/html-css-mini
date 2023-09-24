@@ -3,23 +3,7 @@ import { useLocalStorage } from "@/hooks";
 import { useState } from "react";
 import { ClassPlaceholder } from ".";
 import { nanoid } from "nanoid";
-
-/**
- * 0 -> nothing
- * 1 -> زوج
- * 2 -> فرد
- * 3 -> ثابت
- * 4 -> both زوج & فرد
- */
-type IClassType = "0" | "1" | "2" | "3" | "4";
-
-export interface IClassTimes {
-  id: string;
-  day: TWeekDayNumber;
-  startTime: string;
-  content: string;
-  type: IClassType;
-}
+import { IClassTimes, IDays, TWeekDayNumber } from "../_types";
 
 export default function ClassContents() {
   const { getFromLS, placeToLS } = useLocalStorage();
@@ -127,12 +111,6 @@ export default function ClassContents() {
       ))}
     </tbody>
   );
-}
-
-type TWeekDayNumber = "1" | "2" | "3" | "4" | "5" | "6";
-
-interface IDays {
-  [key: string]: string;
 }
 
 function WeekDays({ label }: { label: TWeekDayNumber }) {

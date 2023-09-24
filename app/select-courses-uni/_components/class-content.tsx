@@ -1,9 +1,10 @@
-import { IClassTimes } from "./class-contents";
+import { IClassTimes } from "../_types";
 
 interface IClassContentProps {
   content: string;
   type: IClassTimes["type"];
 }
+
 const ClassContent = ({ content, type }: IClassContentProps) => {
   if (type === "0" || type === "3") {
     return (

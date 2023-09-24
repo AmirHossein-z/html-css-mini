@@ -5,8 +5,7 @@ import {
   SetStateAction,
   FormEvent,
 } from "react";
-
-import { IClassTimes } from "./class-contents";
+import { IClassTimes } from "../_types";
 
 interface IAddModalProps {
   handleSubmit: (e: FormEvent) => void;

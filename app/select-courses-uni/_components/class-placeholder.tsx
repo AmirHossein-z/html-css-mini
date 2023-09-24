@@ -1,9 +1,9 @@
 "use client";
 
 import { useRef, MutableRefObject, useState, FormEvent } from "react";
-import { IClassTimes } from "./class-contents";
 import { AddModal } from ".";
 import ClassContent from "./class-content";
+import { IClassTimes } from "../_types";
 
 interface IProps {
   classTime: IClassTimes;
@@ -13,7 +13,6 @@ interface IProps {
 
 // better UI
 // affect result on local storage
-// types move to a special file for types
 
 function ClassPlaceholder({
   classTime,

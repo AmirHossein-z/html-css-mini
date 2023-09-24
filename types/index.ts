@@ -1,1 +1,1 @@
-export type TLocalStorageKey = "listPersons";
+export type TLocalStorageKey = "listPersons" | "classTimes";
