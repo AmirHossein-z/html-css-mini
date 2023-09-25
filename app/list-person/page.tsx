@@ -17,11 +17,11 @@ import { BsSortAlphaDown } from "react-icons/bs";
 import { nanoid } from "nanoid";
 import { useRouter } from "next/navigation";
 import { useSearchParams, usePathname } from "next/navigation";
-import { IPerson } from "./_types";
+import { ActionKind, IPerson, IReducerState } from "./_types";
 import { PersonData } from "./_components";
 import { useLocalStorage } from "@/hooks";
+import personReducer from "./reducer";
 
-type IOperation = "add" | "edit" | "delete";
 type IFilterType = "default" | "alphabetic";
 const LOCAL_STORAGE_KEY = "listPersons";
 interface IInput {
@@ -29,45 +29,19 @@ interface IInput {
   lastName: { values: string; styles: string };
 }
 
-enum ActionKind {
-  ADD_PERSON = "ADD_PERSON",
-  CHANGE_OPERATION = "CHANGE_OPERATION",
-}
+export const isAllChecked = (personState: IReducerState) => {
+  const personIds = personState.persons.map((p) => p.id);
+  return (
+    personState.checkingIds.length > 0 &&
+    personIds.every((personId) => personState.checkingIds.includes(personId))
+  );
+};
 
-interface TAction {
-  type: ActionKind;
-  payload?: Partial<IReducerState>;
-}
-
-interface IReducerState {
-  operation: IOperation;
-  checkingIds: string[];
-  persons: IPerson[];
-}
-
-const personReducer = (
-  state: IReducerState,
-  action: TAction
-): IReducerState => {
-  const { type, payload } = action;
-  switch (type) {
-    case ActionKind.CHANGE_OPERATION: {
-      return {
-        ...state,
-        checkingIds: payload?.checkingIds ?? state.checkingIds,
-        operation: payload?.operation ?? state.operation,
-        persons: payload?.persons ?? state.persons,
-      };
-    }
-    case ActionKind.ADD_PERSON: {
-      return {
-        ...state,
-        persons: payload?.persons ?? state.persons,
-      };
-    }
-    default:
-      throw Error("Unknown action: " + action.type);
-  }
+const isValidName = (value: string) => {
+  // this regex checks if user enters english character
+  // and also whitespace is valid
+  const regex = /^[\s\w]{1,25}$/;
+  return regex.test(value);
 };
 
 export default function ListPerson() {
@@ -81,13 +55,13 @@ export default function ListPerson() {
     persons: [],
   };
   const [personState, dispatch] = useReducer(personReducer, initialPersonState);
-  const [filteredPersons, setFilteredPersons] = useState<IPerson[]>([]); //
-  const [filterType, setFilterType] = useState<IFilterType>("default"); //
-  const router = useRouter(); //
-  const pathname = usePathname(); //
-  const searchParams = useSearchParams(); //
-  const params = new URLSearchParams(searchParams); //
-  const search = useRef(params.get("search") ?? ""); //
+  const [filteredPersons, setFilteredPersons] = useState<IPerson[]>([]);
+  const [filterType, setFilterType] = useState<IFilterType>("default");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const params = new URLSearchParams(searchParams);
+  const search = useRef(params.get("search") ?? "");
   const memoizedPersons = useMemo(
     () => personState.persons,
     [personState.persons]
@@ -115,13 +89,6 @@ export default function ListPerson() {
         return true;
     }
     return false;
-  };
-
-  const isValidName = (value: string) => {
-    // this regex checks if user enters english character
-    // and also whitespace is valid
-    const regex = /^[\s\w]{1,25}$/;
-    return regex.test(value);
   };
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -174,28 +141,8 @@ export default function ListPerson() {
     }
   };
 
-  const isAllChecked = () => {
-    const personIds = personState.persons.map((p) => p.id);
-    return (
-      personState.checkingIds.length > 0 &&
-      personIds.every((personId) => personState.checkingIds.includes(personId))
-    );
-  };
-
   const checkAllPerson = () => {
-    if (isAllChecked() || !(personState.persons.length > 0)) {
-      dispatch({
-        type: ActionKind.CHANGE_OPERATION,
-        payload: { checkingIds: [], operation: "add" },
-      });
-    } else {
-      const personIds = personState.persons.map((p) => p.id);
-      dispatch({
-        type: ActionKind.CHANGE_OPERATION,
-        payload: { checkingIds: personIds, operation: "delete" },
-      });
-    }
-
+    dispatch({ type: ActionKind.CHECK_ALL });
     setNames((prevNames) => {
       return {
         ...prevNames,
@@ -213,16 +160,7 @@ export default function ListPerson() {
 
   const deletePerson = (id: string) => {
     if (confirm("Are you sure want to delete?")) {
-      const copyPerson = [...personState.persons];
-      copyPerson.splice(
-        copyPerson.findIndex((p) => p.id === id),
-        1
-      );
-      dispatch;
-      dispatch({
-        type: ActionKind.CHANGE_OPERATION,
-        payload: { checkingIds: [], operation: "add", persons: copyPerson },
-      });
+      dispatch({ type: ActionKind.DELETE_PERSON, payload: { id } });
       setNames((prevNames) => {
         return {
           ...prevNames,
@@ -240,10 +178,7 @@ export default function ListPerson() {
   };
 
   const editPerson = (person: IPerson) => {
-    dispatch({
-      type: ActionKind.CHANGE_OPERATION,
-      payload: { checkingIds: [person.id], operation: "edit" },
-    });
+    dispatch({ type: ActionKind.EDIT_STATE, payload: { id: person.id } });
     setNames((prevNames) => {
       return {
         ...prevNames,
@@ -299,30 +234,16 @@ export default function ListPerson() {
         isValidName(names.firstName.values) &&
         isValidName(names.lastName.values) &&
         !(names.firstName.values === "" || names.lastName.values == "")
-        // !isSimilar({
-        //   firstName: names.firstName.values,
-        //   lastName: names.lastName.values,
-        // })
       ) {
-        const copy = [...personState.persons];
-        copy.splice(
-          copy.findIndex((person) => person.id === personState.checkingIds[0]),
-          1
-        );
         const newPerson = {
           id: personState.checkingIds[0],
           firstName: names.firstName.values,
           lastName: names.lastName.values,
         };
         dispatch({
-          type: ActionKind.CHANGE_OPERATION,
-          payload: {
-            checkingIds: [],
-            operation: "add",
-            persons: [...copy, newPerson],
-          },
+          type: ActionKind.EDIT_PERSON,
+          payload: { person: newPerson },
         });
-
         setNames((prevNames) => {
           return {
             ...prevNames,
@@ -342,41 +263,12 @@ export default function ListPerson() {
       personState.checkingIds.length > 0 &&
       confirm("Are you sure want to delete?")
     ) {
-      const copy = [...personState.persons];
-      const newPersons = copy.filter(
-        (p) => !personState.checkingIds.includes(p.id)
-      );
-
-      dispatch({
-        type: ActionKind.CHANGE_OPERATION,
-        payload: { checkingIds: [], operation: "add", persons: newPersons },
-      });
+      dispatch({ type: ActionKind.DELETE_PERSON });
     }
   };
 
   const handleChecking = (id: string) => {
-    if (!personState.checkingIds.includes(id)) {
-      dispatch({
-        type: ActionKind.CHANGE_OPERATION,
-        payload: {
-          checkingIds: [...personState.checkingIds, id],
-          operation: "delete",
-        },
-      });
-    } else {
-      if (personState.checkingIds.length === 1) {
-        dispatch({
-          type: ActionKind.CHANGE_OPERATION,
-          payload: { operation: "add" },
-        });
-      }
-      const copy = [...personState.checkingIds];
-      copy.splice(copy.indexOf(id), 1);
-      dispatch({
-        type: ActionKind.CHANGE_OPERATION,
-        payload: { checkingIds: copy },
-      });
-    }
+    dispatch({ type: ActionKind.CHECK_ONE, payload: { id } });
     setNames((prevNames) => {
       return {
         ...prevNames,
@@ -562,7 +454,7 @@ export default function ListPerson() {
                 id="allPerson"
                 name="allPerson"
                 className=""
-                checked={isAllChecked()}
+                checked={isAllChecked(personState)}
                 onChange={checkAllPerson}
               />
             </th>
