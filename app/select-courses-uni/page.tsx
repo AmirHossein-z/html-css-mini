@@ -1,6 +1,21 @@
-import { ClassContents, Times } from "./_components";
+"use client";
+import { MutableRefObject, useEffect, useRef } from "react";
+import { ClassContents, SelectTimes, Times } from "./_components";
+import { ITimesType } from "./_types";
+import { useLocalStorage } from "@/hooks";
 
 export default function SelectCoursesUni() {
+  const timesType = useRef<null | ITimesType[]>(null);
+  const { getFromLS, placeToLS } = useLocalStorage();
+  const selectTimesModalRef: MutableRefObject<HTMLDialogElement | null> =
+    useRef(null);
+
+  useEffect(() => {
+    if (!(getFromLS("classTimes")?.length > 0)) {
+      selectTimesModalRef.current?.showModal();
+    }
+  }, []);
+
   return (
     <>
       <div>
@@ -27,6 +42,7 @@ export default function SelectCoursesUni() {
           </div>
         </div>
       </div>
+      <SelectTimes timesType={timesType} ref={selectTimesModalRef} />
     </>
   );
 }
