@@ -6,21 +6,21 @@ import { HiClipboard } from "react-icons/hi";
 /**
  * encryption
  * Caesar cipher is one of the simplest encryption methods.
- * In this method, to encode a string, a fixed number nn is considered as a member of the interval [0,25][0,25],
- * and all the characters of the string are shifted forward by nn units.
- * For example, if we consider nn as 11, the character A becomes B or the character Z becomes A.
+ * In this method, to encode a string, a fixed number n is considered as interval [0,25][0,25],
+ * and all the characters of the string are shifted forward by n units.
+ * For example, if we consider n as 1, the character A becomes B or the character Z becomes A.
  * For English lowercase letters, they are converted in the same way;
- * For example, if we consider nn as 22, the character z becomes b and the character h becomes j.
- * In contrast to the encryption process, we have the decoding process,
- * which is the opposite of the encryption process, that is, each character is shifted backwards by nn units.
+ * For example, if we consider n as 2, the character z becomes b and the character h becomes j.
+ * In contrast to the encryption process, we have the decryption process,
+ * which is the opposite of the encryption process, that is, each character is shifted backwards by n units.
  * In these processes, each character can be considered as a member number of [0,25][0,25] interval;
  * That is, the characters a and A correspond to the number 0,
  * the characters b and B correspond to the number 1 and...
- * Note: If nn is greater than 25, the remainder of its division by 26 should be considered.
+ * Note: If n is greater than 25, the remainder of its division by 26 should be considered.
  * Also, the input string is guaranteed to contain only the characters a-z and A-Z (or it may be an empty string).
  * Encryption process:
  * En(x)=(x+n) mod 26 En(x)=(x+n) mod 26
- * Decoding process:
+ * Decryption process:
  * Dn(x)=(x−n) mod 26 Dn​(x)=(x−n) mod 26
  */
 
@@ -142,7 +142,7 @@ export default function CaesarCipher() {
               className="bg-radical-red text-white py-2.5 px-2.5 rounded flex items-center gap-2 mb-4"
             >
               <HiClipboard className="text-xl" />
-              {clipboardText}
+              <span className="animate-blur_in">{clipboardText}</span>
             </button>
           </>
         )}
