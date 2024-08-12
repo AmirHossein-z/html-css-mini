@@ -3,7 +3,7 @@
   height: 300px;
   border-radius: 10px;
   background-color: #000;
-  margin: 100px auto;
+  margin: auto;
   display: grid;
   grid-template-columns: repeat(8, 0fr);
   justify-content: center;
