@@ -1,5 +1,4 @@
 import { TLocalStorageKey } from "@/types";
-import { useEffect } from "react";
 
 const getFromLS = (key: TLocalStorageKey) => {
   let itemsJSON;

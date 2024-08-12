@@ -18,7 +18,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fa-IR">
-      <body className={`${vazir.className} bg-gray-950`}>{children}</body>
+      <body className={`${vazir.className} bg-gray-950 w-screen h-screen`}>
+        {children}
+      </body>
     </html>
   );
 }
