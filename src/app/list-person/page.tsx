@@ -20,7 +20,7 @@ import { useSearchParams, usePathname } from "next/navigation";
 import { ActionKind, IPerson, IReducerState } from "./_types";
 import { PersonData } from "./_components";
 import { useLocalStorage } from "@/hooks";
-import personReducer from "./reducer";
+import personReducer, { isAllChecked } from "./reducer";
 
 type IFilterType = "default" | "alphabetic";
 const LOCAL_STORAGE_KEY = "listPersons";
@@ -28,14 +28,6 @@ interface IInput {
   firstName: { values: string; styles: string };
   lastName: { values: string; styles: string };
 }
-
-export const isAllChecked = (personState: IReducerState) => {
-  const personIds = personState.persons.map((p) => p.id);
-  return (
-    personState.checkingIds.length > 0 &&
-    personIds.every((personId) => personState.checkingIds.includes(personId))
-  );
-};
 
 const isValidName = (value: string) => {
   // this regex checks if user enters english character
@@ -64,7 +56,7 @@ export default function ListPerson() {
   const search = useRef(params.get("search") ?? "");
   const memoizedPersons = useMemo(
     () => personState.persons,
-    [personState.persons]
+    [personState.persons],
   );
   const { getFromLS, placeToLS } = useLocalStorage();
 
@@ -288,17 +280,17 @@ export default function ListPerson() {
     let finalFilter: IPerson[];
     if (typeof params === "undefined") {
       const filteredFromAlphabetic = filterBaseAlphabetic(
-        getFromLS(LOCAL_STORAGE_KEY)
+        getFromLS(LOCAL_STORAGE_KEY),
       );
       const filteredFromSearch = searchList(
         filteredFromAlphabetic,
-        search.current
+        search.current,
       );
       finalFilter = filteredFromSearch;
     } else {
       const filteredFromSearch = searchList(
         getFromLS(LOCAL_STORAGE_KEY),
-        params.target.value
+        params.target.value,
       );
       const filteredFromAlphabetic = filterBaseAlphabetic(filteredFromSearch);
       finalFilter = filteredFromAlphabetic;
@@ -315,7 +307,7 @@ export default function ListPerson() {
     const filtered = ps.filter(
       (p) =>
         p.firstName.toLowerCase().includes(searchValue ?? search.current) ||
-        p.lastName.toLowerCase().includes(searchValue ?? search.current)
+        p.lastName.toLowerCase().includes(searchValue ?? search.current),
     );
 
     if (searchValue?.length === 0 || search.current.length === 0) {
@@ -395,10 +387,10 @@ export default function ListPerson() {
               personState.operation === "add"
                 ? "bg-green-500 hover:bg-green-900 focus:outline-green-500"
                 : personState.operation === "edit"
-                ? "bg-yellow-500 hover:bg-yellow-900 focus:outline-yellow-900"
-                : personState.operation === "delete"
-                ? "bg-red-500 hover:bg-red-900 focus:outline-red-900"
-                : ""
+                  ? "bg-yellow-500 hover:bg-yellow-900 focus:outline-yellow-900"
+                  : personState.operation === "delete"
+                    ? "bg-red-500 hover:bg-red-900 focus:outline-red-900"
+                    : ""
             } py-1 px-2 w-1/4 md:w-auto flex justify-center gap-2 mx-auto sm:py-1.5 sm:px-3 md:px-3.5 rounded-sm text-lime-50 transition-all duration-300 focus:border-none outline-none`}
           >
             {personState.operation === "add" ? (

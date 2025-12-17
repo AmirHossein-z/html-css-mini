@@ -16,13 +16,14 @@ interface IAddModalProps {
 }
 const AddModal = forwardRef<any, IAddModalProps>(function AddModal(
   { handleSubmit, inputs, setInputs, canAddClassTime, type },
-  ref
+  ref,
 ) {
   const handelChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     setInputs({ ...inputs, [e.target.name]: e.target.value });
   };
+
   return (
     <dialog id="my_modal_1" className="modal" ref={ref}>
       <form
@@ -40,12 +41,11 @@ const AddModal = forwardRef<any, IAddModalProps>(function AddModal(
           className="input input-primary bg-transparent text-black"
           name="content"
           placeholder="نام کلاس"
-          value={...inputs.content.split(";")}
+          value={inputs.content.split(";")}
           onChange={(e) => handelChange(e)}
         />
         <select
           className="select select-primary bg-transparent text-black"
-          placeholder="نوع کلاس"
           name="type"
           value={inputs.type}
           onChange={(e) => handelChange(e)}

@@ -1,5 +1,13 @@
 import { ActionKind, IOperation, IReducerState, TAction } from "../_types";
-import { isAllChecked } from "../page";
+
+export const isAllChecked = (personState: IReducerState) => {
+  const personIds = personState.persons.map((p) => p.id);
+  return (
+    personState.checkingIds.length > 0 &&
+    personIds.every((personId) => personState.checkingIds.includes(personId))
+  );
+};
+
 
 const personReducer = (
   state: IReducerState,
